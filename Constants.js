@@ -40,13 +40,22 @@ const ARMOR_TYPES = {
     "DRUID"         : "LEATHER",
     "DEMON HUNTER"  : "LEATHER"
 };
-const MAIN_STATS = {
-    INT : "INTELLECT",
+const STATS = {
+    STR : "STRENGTH",
     AGI : "AGILITY",
-    STR : "STRENGTH"
+    INT : "INTELLECT"
 };
-const ROLES = {
-    TANK    : "TANK",
-    HEALER  : "HEALER",
-    DAMAGE  : "DAMAGE"
-};
+const STAT_SPECS = {
+    1 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR },
+    2 : { 0:STATS.INT, 1:STATS.STR, 2:STATS.STR },
+    3 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
+    4 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
+    5 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    6 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR},
+    7 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.INT},
+    8 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    9 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    10 : { 0:STATS.AGI, 1:STATS.INT, 2:STATS.AGI},
+    11 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.AGI, 3:STATS.INT},
+    12 : { 0:STATS.AGI, 1:STATS.AGI}
+}
