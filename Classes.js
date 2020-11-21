@@ -25,22 +25,47 @@ class RaidMember {
         return this.lootSpecs;
     }
     getArmorType() {
-        return ARMOR_TYPES[this.playerClass];
+        return CLASS_ARMORTYPES[this.playerClass];
+    }
+    getWeaponToken() {
+        return CLASS_TOKENS[this.playerClass];
+    }
+    getMainStat(specNumber) {
+        return SPEC_STATS[CLASSES[this.playerClass]][specNumber];
     }
     getMainStats() {
         let mainStats = [];
         for (let specNumber in this.getLootSpecs()){
-            mainStats.push(STAT_SPECS[CLASSES[this.playerClass]][specNumber]);
+            mainStats.push(SPEC_STATS[CLASSES[this.playerClass]][specNumber]);
         }
         return mainStats;
+    }
+    getTrinkets() {
+        let trinkets = [];
+        for (let specNumber in this.getLootSpecs()){
+            if (this.lootSpecs[specNumber]) {
+                let specTrinkets = SPEC_TRINKETS[CLASSES[this.playerClass]][specNumber];
+
+                if (specNumber && specTrinkets) {
+                    specTrinkets.forEach(function (trinket) {
+                        trinkets.push(trinket);
+                    })
+                }
+            }
+        }
+        return trinkets;
     }
     isAvailable() {
         return this.available;
     }
     isSpecAvailable() {
+        let specAvailable = false;
         for (let spec in this.lootSpecs) {
-            return spec ? true : false;
+            if (this.lootSpecs[spec]) {
+                specAvailable = true;
+            }
         }
+        return specAvailable;
     }
     setBuyerName(buyerName) {
         this.buyerName = buyerName;
