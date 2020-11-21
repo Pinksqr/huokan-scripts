@@ -1,14 +1,5 @@
 let properties = PropertiesService.getScriptProperties();
 
-/*function onOpen(event) {
-    Logger.log("Event: onOpen Triggered");
-
-    let raidRoster = JSON.parse(properties.getProperty("raidRoster"));
-    if (raidRoster === null) {
-        updateRaidRoster();
-    }
-}*/
-
 function onEdit(event) {
     let sheet = event.source.getActiveSheet();
     let range = event.range;
@@ -30,12 +21,9 @@ function updateRaidRosterSpecCheckboxes(sheet, range, value) {
         let col = range.getColumn();
 
         if (row > 4 && col === classColumn) {
-
-            //Clear data
             sheet.getRange(row, col+1, 1, 8).clearContent().removeCheckboxes();
 
             if (value) {
-                //Get & set spec names
                 let specNameCells = [col + 2, col + 4, col + 6, col + 8];
                 let specNames = SPECIALIZATIONS[CLASSES[value.toUpperCase()]];
 
@@ -55,18 +43,13 @@ function updateRaidRoster(sheet, range) {
         let col = range.getColumn();
 
         if (row > 4 && col < 13) {
-
             let raidRoster = createRaidRoster();
+
             raidRoster.sort(function(a, b) {
                 return a.alts.length - b.alts.length;
             })
 
-            raidRoster.forEach(function(player) {
-                Logger.log(player.getPlayerName() + " alts: " + player.alts.length);
-            })
-
             updateProperties(raidRoster);
-            updateRaidRosterMaxCounts();
         }
     }
 }
@@ -79,35 +62,19 @@ function createRaidRoster() {
     let altSheetValues = altSheet.getSheetValues(6, 1, altSheet.getLastRow(), 12);
     let raidRoster = []; //new RaidRoster();
 
-    //Column values for each variable; Must be updated when the sheet is moved around
-    const mainSheetCols = {
-        available   : 1,
-        playerName  : 2,
-        playerClass : 3,
-        lootSpecs   : [4, 6, 8, 10]
-    };
-
-    const altSheetCols = {
-        available   : 1,
-        mainName    : 2,
-        altName     : 3,
-        altClass    : 4,
-        lootSpecs   : [5, 7, 9, 11]
-    };
-
     //Create main raiders and add to roster
     for (let row in mainSheetValues) {
         let currentRow  = mainSheetValues[row];
-        let available   = currentRow[mainSheetCols.available];
-        let playerName  = currentRow[mainSheetCols.playerName];
-        let playerClass = currentRow[mainSheetCols.playerClass];
+        let available   = currentRow[COLUMNS_RAIDMAINS.AVAILABLE];
+        let playerName  = currentRow[COLUMNS_RAIDMAINS.PLAYER_NAME];
+        let playerClass = currentRow[COLUMNS_RAIDMAINS.PLAYER_CLASS];
         let lootSpecs   = [];
 
-        mainSheetCols.lootSpecs.forEach(function (col) {
+        COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
             lootSpecs.push(currentRow[col]);
         });
 
-        if (available && playerName && playerClass && lootSpecs) {
+        if (playerName && playerClass && lootSpecs) {
             raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
         }
     }
@@ -115,26 +82,27 @@ function createRaidRoster() {
     //Create raider alts and connect to mains in the raid roster
     for (let row in altSheetValues){
         let currentRow  = altSheetValues[row];
-        let available   = currentRow[altSheetCols.available];
-        let mainName    = currentRow[altSheetCols.mainName];
-        let altName     = currentRow[altSheetCols.altName];
-        let altClass    = currentRow[altSheetCols.altClass];
+        let available   = currentRow[COLUMNS_RAIDALTS.AVAILABLE];
+        let mainName    = currentRow[COLUMNS_RAIDALTS.MAIN_NAME];
+        let altName     = currentRow[COLUMNS_RAIDALTS.ALT_NAME];
+        let altClass    = currentRow[COLUMNS_RAIDALTS.ALT_CLASS];
         let lootSpecs   = [];
 
-        altSheetCols.lootSpecs.forEach(function (col) {
+        COLUMNS_RAIDALTS.LOOT_SPECS.forEach(function (col) {
             lootSpecs.push(currentRow[col]);
         });
 
-        //TODO: Currently fails if a main is unavailable and an alt is available!
-        if (available && mainName && altName && altClass && lootSpecs) {
-            raidRoster[getMainIndexByName(mainName)].addAlt(altName, altClass.toUpperCase(). lootSpecs, available);
+        let main = getMainByName(mainName);
+
+        if (main && main.isAvailable() && available && altName && altClass && lootSpecs) {
+            main.addAlt(altName, altClass.toUpperCase(), lootSpecs, available);
         }
     }
 
-    function getMainIndexByName(name) {
+    function getMainByName(name) {
         for (let index in raidRoster) {
             if (raidRoster[index].getPlayerName() === name) {
-                return index;
+                return raidRoster[index];
             }
         }
     }
@@ -143,40 +111,34 @@ function createRaidRoster() {
 }
 
 function updateProperties(raidRoster) {
+    let raidInfoSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information");
     let maxValues = getMaxValues(raidRoster);
 
-    properties.setProperties({
-        "raidRoster"    : JSON.stringify(raidRoster),
-        "maxPlate"      : maxValues.maxArmorType.PLATE,
-        "maxMail"       : maxValues.maxArmorType.MAIL,
-        "maxLeather"    : maxValues.maxArmorType.LEATHER,
-        "maxCloth"      : maxValues.maxArmorType.CLOTH,
-        "maxStr"        : maxValues.maxMainStat.STR,
-        "maxAgi"        : maxValues.maxMainStat.AGI,
-        "maxInt"        : maxValues.maxMainStat.INT
-    }, true);
-}
+    //Clear values
+    clearValues(CELLS_RAIDINFO_ARMORTYPES);
+    clearValues(CELLS_RAIDINFO_MAINSTATS);
+    clearValues(CELLS_RAIDINFO_CLASSES);
+    clearValues(CELLS_RAIDINFO_WEAPONS);
+    clearValues(CELLS_RAIDINFO_TRINKETS);
 
-function updateRaidRosterMaxCounts() {
-    let raidInfoSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information");
+    //Update values
+    updateValues(maxValues.maxArmorTypes, CELLS_RAIDINFO_ARMORTYPES);
+    updateValues(maxValues.maxMainStats, CELLS_RAIDINFO_MAINSTATS);
+    updateValues(maxValues.maxWeaponTokens, CELLS_RAIDINFO_WEAPONS);
+    updateValues(maxValues.maxTrinkets, CELLS_RAIDINFO_TRINKETS);
+    updateValues(maxValues.maxClassNames, CELLS_RAIDINFO_CLASSES);
 
-    let raidMainCells = {
-        maxPlateValue   : "M8",
-        maxMailValue    : "M9",
-        maxLeatherValue : "M10",
-        maxClothValue   : "M11",
-        maxStrValue     : "P8",
-        maxAgiValue     : "P9",
-        maxIntValue     : "P10"
-    };
+    function clearValues(rangeArray) {
+        for (const cell in rangeArray) {
+            raidInfoSheet.getRange(rangeArray[cell]).clearContent();
+        }
+    }
 
-    raidInfoSheet.getRange(raidMainCells.maxPlateValue).setFormula(getMaxPlate());
-    raidInfoSheet.getRange(raidMainCells.maxMailValue).setFormula(getMaxMail());
-    raidInfoSheet.getRange(raidMainCells.maxLeatherValue).setFormula(getMaxLeather());
-    raidInfoSheet.getRange(raidMainCells.maxClothValue).setFormula(getMaxCloth());
-    raidInfoSheet.getRange(raidMainCells.maxStrValue).setFormula(getMaxStrength());
-    raidInfoSheet.getRange(raidMainCells.maxAgiValue).setFormula(getMaxAgility());
-    raidInfoSheet.getRange(raidMainCells.maxIntValue).setFormula(getMaxIntellect());
+    function updateValues(values, rangeArray) {
+        for (const value in values) {
+            raidInfoSheet.getRange(rangeArray[value]).setValue(values[value]);
+        }
+    }
 }
 
 function updateReservationSpecDropdown(sheet, range, value) {
@@ -204,33 +166,9 @@ function updateReservationFunnelDropdown(sheet, range, value) {
     }
 }
 
-function getMaxPlate() {
-    return properties.getProperty("maxPlate");
-}
+function createReservationSheet() {}
 
-function getMaxMail() {
-    return properties.getProperty("maxMail");
-}
-
-function getMaxLeather() {
-    return properties.getProperty("maxLeather");
-}
-
-function getMaxCloth() {
-    return properties.getProperty("maxCloth");
-}
-
-function getMaxStrength() {
-    return properties.getProperty("maxStr");
-}
-
-function getMaxAgility() {
-    return properties.getProperty("maxAgi");
-}
-
-function getMaxIntellect() {
-    return properties.getProperty("maxInt");
-}
+/** Helper Functions **/
 
 function getColumnByName(sheet, row, name) {
     return sheet.getDataRange().getValues()[row].indexOf(name)+1;
@@ -238,61 +176,110 @@ function getColumnByName(sheet, row, name) {
 
 function getMaxValues(raidMembers) {
     let maxValues = {
-        maxArmorType : { "PLATE":0, "MAIL":0, "LEATHER":0, "CLOTH":0 },
-        maxMainStat : { STR:0, AGI:0, INT:0 },
-        maxClass : { "WARRIOR":0, "PALADIN":0, "HUNTER":0, "ROGUE":0, "PRIEST":0, "DEATH KNIGHT":0, "SHAMAN":0,
-            "MAGE":0, "WARLOCK":0, "MONK":0, "DRUID":0, "DEMON HUNTER":0 }
-    }
-
-    let addedValues = {
-        armorTypes : {},
-        classNames : {},
-        mainStats : {}
+        maxArmorTypes   : {},
+        maxMainStats    : {},
+        maxClassNames   : {},
+        maxWeaponTokens : {},
+        maxTrinkets     : {}
     }
 
     raidMembers.forEach(function(main) {
+        let addedValues = {
+            armorTypes      : {},
+            mainStats       : {},
+            classNames      : {},
+            weaponTokens    : {},
+            trinkets        : {}
+        }
+
+        //TODO: Condense some duplicated code here
+
         if (main.isAvailable()) {
+            let lootSpecs = main.getLootSpecs();
             let armorType = main.getArmorType();
             let className = main.getClassName();
-            let mainStats = main.getMainStats();
+            let weaponToken = main.getWeaponToken();
+            let trinkets = main.getTrinkets();
 
             if (main.isSpecAvailable()) {
-                maxValues.maxArmorType[armorType]++;
-                maxValues.maxClass[className]++;
-                mainStats.forEach(function(stat) {
-                    if (!addedValues.mainStats[stat]) {
-                        maxValues.maxMainStat[stat]++;
-                        addedValues.mainStats[stat] = true;
+                //Add values to maxValues object
+                maxValues.maxArmorTypes[armorType] = maxValues.maxArmorTypes[armorType] + 1 || 1;
+                maxValues.maxClassNames[className] = maxValues.maxClassNames[className] + 1 || 1;
+                maxValues.maxWeaponTokens[weaponToken] = maxValues.maxWeaponTokens[weaponToken] + 1 || 1;
+
+                //For each ACTIVE spec, add each unique main stat the specs provide (ex, Paladin provides Int & Str for all specs)
+                for (let index in lootSpecs) {
+                    if (lootSpecs[index]) {
+                        let mainStat = main.getMainStat(index);
+                        if (mainStat && !addedValues.mainStats[mainStat]) {
+                            maxValues.maxMainStats[mainStat] = maxValues.maxMainStats[mainStat] + 1 || 1;
+                            addedValues.mainStats[mainStat] = true;
+                        }
                     }
-                });
+                }
+
+                trinkets.forEach(function (spec) {
+                    spec.forEach(function (trinket) {
+                        if (!addedValues.trinkets[trinket]) {
+                            maxValues.maxTrinkets[trinket] = maxValues.maxTrinkets[trinket] + 1 || 1;
+                            addedValues.trinkets[trinket] = true;
+                        }
+                    })
+                })
+
+                //Since a main can't provide more than one funnel (unless they multi-box), they're armor class, etc, can only be added once.
                 addedValues.armorTypes[armorType] = true;
                 addedValues.classNames[className] = true;
+                addedValues.weaponTokens[weaponToken] = true;
             }
         }
 
         let alts = main.getAlts();
 
         alts.forEach(function(alt) {
+
             if (alt.isAvailable()){
+                let altLootSpecs = alt.getLootSpecs();
                 let altArmorType = alt.getArmorType();
                 let altClassName = alt.getClassName();
                 let altMainStats = alt.getMainStats();
+                let altWeaponToken = alt.getWeaponToken();
+                let altTrinkets = alt.getTrinkets();
 
-                if (main.isSpecAvailable()) {
+                if (main.isAvailable() && alt.isSpecAvailable()) {
                     if (!addedValues.armorTypes[altArmorType]) {
-                        maxValues.maxArmorType[altArmorType]++;
+                        maxValues.maxArmorTypes[altArmorType] = maxValues.maxArmorTypes[altArmorType] + 1 || 1;
                         addedValues.armorTypes[altArmorType] = true;
                     }
+
                     if (!addedValues.classNames[altClassName]) {
-                        maxValues.maxClass[altClassName]++;
+                        maxValues.maxClassNames[altClassName] = maxValues.maxClassNames[altClassName] + 1 || 1;
                         addedValues.armorTypes[altArmorType] = true;
                     }
-                    altMainStats.forEach(function(stat) {
-                        if (!addedValues.mainStats[stat]) {
-                            maxValues.maxMainStat[stat]++;
-                            addedValues.mainStats[stat] = true;
+
+                    if (!addedValues.weaponTokens[altWeaponToken]) {
+                        maxValues.maxWeaponTokens[altWeaponToken] = maxValues.maxWeaponTokens[altWeaponToken] + 1 || 1;
+                        addedValues.weaponTokens[altWeaponToken] = true;
+                    }
+
+                    for (let index in altLootSpecs) {
+                        if (altLootSpecs[index]) {
+                            let mainStat = alt.getMainStat(index);
+                            if (mainStat && !addedValues.mainStats[mainStat]) {
+                                maxValues.maxMainStats[mainStat] = maxValues.maxMainStats[mainStat] + 1 || 1;
+                                addedValues.mainStats[mainStat] = true;
+                            }
                         }
-                    });
+                    }
+
+                    altTrinkets.forEach(function (spec) {
+                        spec.forEach(function (trinket) {
+                            if (!addedValues.trinkets[trinket]) {
+                                maxValues.maxTrinkets[trinket] = maxValues.maxTrinkets[trinket] + 1 || 1;
+                                addedValues.trinkets[trinket] = true;
+                            }
+                        })
+                    })
                 }
             }
         })
@@ -300,8 +287,6 @@ function getMaxValues(raidMembers) {
 
     return maxValues;
 }
-
-/** Helper Functions **/
 
 function toTitleCase(str){
     return str.toLowerCase().split(" ").map(function(val){
