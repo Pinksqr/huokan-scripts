@@ -12,6 +12,9 @@ function onEdit(event) {
     //Reservation sheet updates
     updateReservationSpecDropdown(sheet, range, value);
     updateReservationFunnelDropdown(sheet, range, value);
+
+    //Reservation sheet validation
+    checkReservation(sheet, range, value);
 }
 
 function updateRaidRosterSpecCheckboxes(sheet, range, value) {
@@ -128,6 +131,10 @@ function updateProperties(raidRoster) {
     updateValues(maxValues.maxTrinkets, CELLS_RAIDINFO_TRINKETS);
     updateValues(maxValues.maxClassNames, CELLS_RAIDINFO_CLASSES);
 
+    //Add raidRoster to properties (must be present in case a new reservation sheet is made)
+    Logger.log(JSON.stringify(raidRoster));
+    properties.setProperty("raidRoster", JSON.stringify(raidRoster));
+
     function clearValues(rangeArray) {
         for (const cell in rangeArray) {
             raidInfoSheet.getRange(rangeArray[cell]).clearContent();
@@ -142,31 +149,138 @@ function updateProperties(raidRoster) {
 }
 
 function updateReservationSpecDropdown(sheet, range, value) {
-    if (sheet.getName() !== "Raid Mains" && sheet.getName() !== "Raid Alts") {
+    let sheetName = sheet.getName()
+    if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
         let row = range.getRow();
         let col = range.getColumn();
 
-        if (row > 7 && col === 11) {
-            let specCell = sheet.getRange(row, 11).clearContent().clearDataValidations();
+        if (row > 7 && col === COLUMNS_RESERVATIONS.CLASS) {
+            let specCell = sheet.getRange(row, COLUMNS_RESERVATIONS.SPEC).clearContent().clearDataValidations();
             let specNames = SPECIALIZATIONS[CLASSES[value.toUpperCase()]];
-            let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(specNames)).build();
-            specCell.setDataValidation(dataRule);
+            if (specNames) {
+                let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(specNames)).build();
+                specCell.setDataValidation(dataRule);
+            }
         }
     }
 }
 
 function updateReservationFunnelDropdown(sheet, range, value) {
-    if (sheet.getName() !== "Raid Mains" && (sheet.getName !== "RaidAlts")) {
+    let sheetName = sheet.getName()
+    if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
         let row = range.getRow();
         let col = range.getColumn();
 
-        if (row > 7 && col === 16 ) {
+        if (row > 7 && col === COLUMNS_RESERVATIONS.FUNNEL_TYPE) {
+            let funnelOptionCell = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION).clearContent().clearDataValidations();
+            let funnelOptions = []
 
+            if (value === "Weapon Funnel") {
+                for (let token in TOKENS) {
+                    funnelOptions.push(TOKENS[token]);
+                }
+            } else if (value === "Trinket Funnel") {
+                for (let trinket in TRINKETS) {
+                    funnelOptions.push(TRINKETS[trinket]);
+                }
+            }
+
+            if (funnelOptions && funnelOptions.length) {
+                let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(funnelOptions)).build();
+                funnelOptionCell.setDataValidation(dataRule);
+            }
         }
     }
 }
 
-function createReservationSheet() {}
+function checkReservation(sheet, range, value) {
+    let sheetName = sheet.getName();
+
+    if(sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
+        let row = range.getRow();
+        let col = range.getColumn();
+
+        if (row > 7 && col === COLUMNS_RESERVATIONS.CHECKBOX && value) {
+            let carryCheck = isCarryAvailable(sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE).getValue());
+            let funnelCheck = isFunnelAvailable(sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS).getValue());
+
+            if (carryCheck && funnelCheck) {
+                let raidRoster  = JSON.parse(sheet.getRange("A1").getValue());
+                let buyerName   = sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_NAME).getValue();
+                let service     = sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE).getValue();
+                let funnels     = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS).getValue();
+                let funnelType  = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_TYPE).getValue();
+                let funnelOpt   = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION).getValue();
+
+                Logger.log(buyerName + service + funnels + funnelType + funnelOpt);
+
+                //TODO: Find booster for buyer with raidRoster
+                for (let funnelNum = 0; funnelNum <= funnels; funnelNum++) {
+                    for (let booster in raidRoster) {
+                        Logger.log(raidRoster[booster]);
+                    }
+                }
+
+                //TODO: Change booster(s) buyerName to buyer
+                //TODO: Recalculate current values
+                //let currentValues = getMaxValues(raidRoster);
+            }
+        }
+    }
+
+    /** Checks if a carry spot is available */
+    function isCarryAvailable(service) {
+        return true;
+    }
+
+    /** Checks if a funnel spot is available */
+    function isFunnelAvailable(funnelNumber) {
+        return true;
+    }
+
+}
+
+function processReservation(sheet, range, value) {
+    let raidRoster = JSON.parse(sheet.getRange("A1").getValue());
+
+
+}
+
+function createReservationSheet() {
+    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let templateSheet = spreadsheet.getSheetByName("Reservation Template");
+    let raidInfoSheet = spreadsheet.getSheetByName("Raid Information");
+
+    let newSheet = templateSheet.copyTo(spreadsheet);
+    let newSheetName = raidInfoSheet.getRange(CELLS_RESERVATIONS_INFO.DATE).getDisplayValue();
+
+    if (newSheetName && !spreadsheet.getSheetByName(newSheetName)) {
+        newSheet.setName(newSheetName);
+        newSheet.activate();
+        spreadsheet.moveActiveSheet(5);
+    }
+
+    let raidRoster = properties.getProperty("raidRoster");
+
+    if (raidRoster) {
+        newSheet.getRange("A1").clearContent().setValue(raidRoster);
+    }
+
+    //Currently not copying class data; too much clutter
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_CARRIES, newSheet, CELLS_RESERVATIONS_CARRIES);
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_FUNNELS, newSheet, CELLS_RESERVATIONS_FUNNELS);
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES);
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_MAINSTATS, newSheet, CELLS_RESERVATIONS_MAINSTATS);
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS);
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS);
+
+    function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
+        for (let cell in sourceCells) {
+            let value = sourceSheet.getRange(sourceCells[cell]).getValue();
+            destSheet.getRange(destCells[cell]).setValue(value);
+        }
+    }
+}
 
 /** Helper Functions **/
 
@@ -194,7 +308,7 @@ function getMaxValues(raidMembers) {
 
         //TODO: Condense some duplicated code here
 
-        if (main.isAvailable()) {
+        if (main.isAvailable() && !main.hasBuyer()) {
             let lootSpecs = main.getLootSpecs();
             let armorType = main.getArmorType();
             let className = main.getClassName();
