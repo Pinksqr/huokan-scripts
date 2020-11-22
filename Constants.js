@@ -12,6 +12,7 @@ const CLASSES = {
     "DRUID" : 11,
     "DEMON HUNTER" : 12
 };
+
 const SPECIALIZATIONS = {
     1 : ["ARMS", "FURY", "PROTECTION"],
     2 : ["HOLY", "PROTECTION", "RETRIBUTION"],
@@ -26,6 +27,7 @@ const SPECIALIZATIONS = {
     11 : ["BALANCE", "FERAL", "GUARDIAN", "RESTORATION"],
     12 : ["HAVOC", "VENGEANCE"]
 };
+
 //TODO: Change left side to numbers, then use CLASS_ARMORTYPES[CLASSES[this.playerClass.toUpperCase()]]
 const CLASS_ARMORTYPES = {
     "WARRIOR"       : "PLATE",
@@ -41,11 +43,13 @@ const CLASS_ARMORTYPES = {
     "DRUID"         : "LEATHER",
     "DEMON HUNTER"  : "LEATHER"
 };
+
 const STATS = {
     STR : "STRENGTH",
     AGI : "AGILITY",
     INT : "INTELLECT"
 };
+
 const SPEC_STATS = {
     1 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR },
     2 : { 0:STATS.INT, 1:STATS.STR, 2:STATS.STR },
@@ -60,6 +64,14 @@ const SPEC_STATS = {
     11 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.AGI, 3:STATS.INT},
     12 : { 0:STATS.AGI, 1:STATS.AGI}
 };
+
+const TOKENS = {
+    1 : "ABOMINABLE",
+    2 : "MYSTIC",
+    3 : "VENERATED",
+    4 : "ZENITH"
+}
+
 //TODO: Change left side to numbers, then use CLASS_TOKENS[CLASSES[this.playerClass]]
 const CLASS_TOKENS = {
     "WARRIOR"       : "ZENITH",
@@ -75,6 +87,7 @@ const CLASS_TOKENS = {
     "DRUID"         : "MYSTIC",
     "DEMON HUNTER"  : "ABOMINABLE"
 };
+
 const TRINKETS = {
     0 : "SKULKER'S WING",               //STR AGI
     1 : "BARGAST'S LEASH",              //STR AGI
@@ -93,6 +106,7 @@ const TRINKETS = {
     14 : "MANABOUND MIRROR",            //INT
     15 : "DREADFIRE VESSEL"             //STR AGI INT
 };
+
 const ROLE_TRINKETS = {
     TANK : [],
     HEALER : [],
@@ -100,7 +114,8 @@ const ROLE_TRINKETS = {
     MELEE_AGI : [TRINKETS[0], TRINKETS[1], TRINKETS[5], TRINKETS[8], TRINKETS[9], TRINKETS[10], TRINKETS[11], TRINKETS[12], TRINKETS[15]],
     RANGE_AGI : [TRINKETS[0], TRINKETS[1], TRINKETS[5], TRINKETS[8], TRINKETS[9], TRINKETS[10], TRINKETS[11], TRINKETS[12], TRINKETS[15]],
     RANGE_INT : [TRINKETS[3], TRINKETS[4], TRINKETS[6], TRINKETS[7], TRINKETS[9], TRINKETS[13], TRINKETS[14], TRINKETS[15]],
-}
+};
+
 const SPEC_TRINKETS = {
     1 : { //WARRIOR
         0 : [ROLE_TRINKETS.MELEE_STR],
