@@ -67,6 +67,9 @@ class RaidMember {
         }
         return specAvailable;
     }
+    hasBuyer() {
+        return this.buyerName ? true : false;
+    }
     setBuyerName(buyerName) {
         this.buyerName = buyerName;
     }
@@ -107,4 +110,3 @@ class RaidMain extends RaidMember {
         return this.alts.length;
     }
 }
-
