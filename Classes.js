@@ -8,73 +8,13 @@
  * available: if the player is currently available (not sitting/out/saved)
  */
 class RaidMember {
-    constructor(playerName, playerClass, lootSpecs, available, buyerName){
+    constructor(playerName, playerClass, lootSpecs, available, buyerName, boosterName){
         this.playerName = playerName;
         this.playerClass = playerClass;
         this.lootSpecs = lootSpecs;
         this.available = available;
         this.buyerName = buyerName;
-    }
-    getPlayerName() {
-        return this.playerName;
-    }
-    getClassName() {
-        return this.playerClass;
-    }
-    getLootSpecs() {
-        return this.lootSpecs;
-    }
-    getArmorType() {
-        return CLASS_ARMORTYPES[this.playerClass];
-    }
-    getWeaponToken() {
-        return CLASS_TOKENS[this.playerClass];
-    }
-    getMainStat(specNumber) {
-        return SPEC_STATS[CLASSES[this.playerClass]][specNumber];
-    }
-    getMainStats() {
-        let mainStats = [];
-        for (let specNumber in this.getLootSpecs()){
-            mainStats.push(SPEC_STATS[CLASSES[this.playerClass]][specNumber]);
-        }
-        return mainStats;
-    }
-    getTrinkets() {
-        let trinkets = [];
-        for (let specNumber in this.getLootSpecs()){
-            if (this.lootSpecs[specNumber]) {
-                let specTrinkets = SPEC_TRINKETS[CLASSES[this.playerClass]][specNumber];
-
-                if (specNumber && specTrinkets) {
-                    specTrinkets.forEach(function (trinket) {
-                        trinkets.push(trinket);
-                    })
-                }
-            }
-        }
-        return trinkets;
-    }
-    isAvailable() {
-        return this.available;
-    }
-    isSpecAvailable() {
-        let specAvailable = false;
-        for (let spec in this.lootSpecs) {
-            if (this.lootSpecs[spec]) {
-                specAvailable = true;
-            }
-        }
-        return specAvailable;
-    }
-    hasBuyer() {
-        return this.buyerName ? true : false;
-    }
-    setBuyerName(buyerName) {
-        this.buyerName = buyerName;
-    }
-    getBuyerName() {
-        return this.buyerName;
+        this.boosterName = boosterName;
     }
 }
 
@@ -88,25 +28,11 @@ class RaidMain extends RaidMember {
         super(playerName, playerClass, lootSpecs, available);
         this.alts = [];
     }
+
     addAlt(altName, altClass, lootSpecs, available) {
         let alt = new RaidMember(altName, altClass, lootSpecs, available);
         this.alts.push(alt);
         return alt;
     }
-    getAlts() {
-        return this.alts;
-    }
-    getAlt(index) {
-        return this.alts[index];
-    }
-    getAltClasses() {
-        let altClasses = [];
-        for (let index in this.alts) {
-            altClasses.push(this.alts[index].getClassName());
-        }
-        return altClasses;
-    }
-    getAltCount() {
-        return this.alts.length;
-    }
+
 }
