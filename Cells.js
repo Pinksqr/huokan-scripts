@@ -32,66 +32,64 @@ const CELLS_RAIDINFO_FUNNELS = {
     "SIRE DENATHRIUS"       : "G17",
 };
 
+const CELLS_RAIDINFO_CLASSES = {
+    "WARRIOR"       : "I8",
+    "PALADIN"       : "I9",
+    "HUNTER"        : "I10",
+    "ROGUE"         : "I11",
+    "PRIEST"        : "I12",
+    "DEATH KNIGHT"  : "I13",
+    "SHAMAN"        : "I14",
+    "MAGE"          : "I15",
+    "WARLOCK"       : "I16",
+    "MONK"          : "I17",
+    "DRUID"         : "I18",
+    "DEMON HUNTER"  : "I19"
+};
+
 const CELLS_RAIDINFO_ARMORTYPES = {
-    "PLATE"     : "M8",
-    "MAIL"      : "M9",
-    "LEATHER"   : "M10",
-    "CLOTH"     : "M11"
+    "PLATE"     : "L8",
+    "MAIL"      : "L9",
+    "LEATHER"   : "L10",
+    "CLOTH"     : "L11"
 };
 
 const CELLS_RAIDINFO_MAINSTATS = {
-    "STRENGTH"  : "P8",
-    "AGILITY"   : "P9",
-    "INTELLECT" : "P10"
-};
-
-const CELLS_RAIDINFO_CLASSES = {
-    "WARRIOR"       : "J8",
-    "PALADIN"       : "J9",
-    "HUNTER"        : "J10",
-    "ROGUE"         : "J11",
-    "PRIEST"        : "J12",
-    "DEATH KNIGHT"  : "J13",
-    "SHAMAN"        : "J14",
-    "MAGE"          : "J15",
-    "WARLOCK"       : "J16",
-    "MONK"          : "J17",
-    "DRUID"         : "J18",
-    "DEMON HUNTER"  : "J19"
+    "STRENGTH"  : "O8",
+    "AGILITY"   : "O9",
+    "INTELLECT" : "O10"
 };
 
 const CELLS_RAIDINFO_WEAPONS = {
-    "ABOMINABLE"    : "S8",
-    "MYSTIC"        : "S9",
-    "VENERATED"     : "S10",
-    "ZENITH"        : "S11"
+    "ABOMINABLE"    : "R8",
+    "MYSTIC"        : "R9",
+    "VENERATED"     : "R10",
+    "ZENITH"        : "R11"
 };
 
 const CELLS_RAIDINFO_TRINKETS = {
-    "SKULKER'S WING"                : "V8",
-    "BARGAST'S LEASH"               : "V9",
-    "GLUTTINOUS SPIKE"              : "V10",
-    "CONSUMPTIVE INFUSION"          : "V11",
-    "GLYPH OF ASSIMILATION"         : "V12",
-    "SPLINTERED HEART OF AL'AR"     : "V13",
-    "TUFT OF SMOULDERING PLUMAGE"   : "V14",
-    "SOUL IGNITER"                  : "V15",
-    "MEMORY OF PAST SINS"           : "V16",
-    "MACABRE SHEET MUSIC"           : "V17",
-    "HATEFUL CHAIN"                 : "V18",
-    "STONE LEGION HERALDRY"         : "V19",
-    "SANGUINE VINTAGE"              : "V20",
-    "CABALIST'S HYMNAL"             : "V21",
-    "MANABOUND MIRROR"              : "V22",
-    "DREADFIRE VESSEL"              : "V23"
+    "SKULKER'S WING"                : "U8",
+    "BARGAST'S LEASH"               : "U9",
+    "GLUTTINOUS SPIKE"              : "U10",
+    "CONSUMPTIVE INFUSION"          : "U11",
+    "GLYPH OF ASSIMILATION"         : "U12",
+    "SPLINTERED HEART OF AL'AR"     : "U13",
+    "TUFT OF SMOULDERING PLUMAGE"   : "U14",
+    "SOUL IGNITER"                  : "U15",
+    "MEMORY OF PAST SINS"           : "U16",
+    "MACABRE SHEET MUSIC"           : "U17",
+    "HATEFUL CHAIN"                 : "U18",
+    "STONE LEGION HERALDRY"         : "U19",
+    "SANGUINE VINTAGE"              : "U20",
+    "CABALIST'S HYMNAL"             : "U21",
+    "MANABOUND MIRROR"              : "U22",
+    "DREADFIRE VESSEL"              : "U23"
 };
 
 /** RESERVATION TEMPLATE SHEET */
 
 const CELLS_RESERVATIONS_INFO = {
-    "GUILD" : "C7",
-    "DATE" : "C8",
-    "TIME" : "C9"
+    "GUILD_INFO" : "B3"
 };
 
 const CELLS_RESERVATIONS_CARRIES = {
@@ -192,13 +190,13 @@ const COLUMNS_RAIDALTS = {
 };
 
 const COLUMNS_RESERVATIONS = {
-    BUYER_NAME      : 11,
-    CLASS           : 14,
-    SPEC            : 15,
-    SERVICE         : 17,
-    FUNNELS         : 18,
-    FUNNEL_TYPE     : 19,
-    FUNNEL_OPTION   : 20,
-    NOTE            : 21,
-    CHECKBOX        : 22
+    BUYER_NAME      : 9,
+    CLASS           : 12,
+    SPEC            : 13,
+    SERVICE         : 15,
+    FUNNELS         : 16,
+    FUNNEL_TYPE     : 17,
+    FUNNEL_OPTION   : 18,
+    NOTE            : 19,
+    CHECKBOX        : 20
 };

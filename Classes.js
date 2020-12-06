@@ -9,12 +9,10 @@
  */
 class RaidMember {
     constructor(playerName, playerClass, lootSpecs, available, buyerName, boosterName){
-        this.playerName = playerName;
-        this.playerClass = playerClass;
-        this.lootSpecs = lootSpecs;
-        this.available = available;
-        this.buyerName = buyerName;
-        this.boosterName = boosterName;
+        this.playerName = playerName
+        this.playerClass = playerClass
+        this.lootSpecs = lootSpecs
+        this.available = available
     }
 }
 
@@ -25,14 +23,21 @@ class RaidMember {
  */
 class RaidMain extends RaidMember {
     constructor(playerName, playerClass, lootSpecs, available) {
-        super(playerName, playerClass, lootSpecs, available);
-        this.alts = [];
+        super(playerName, playerClass, lootSpecs, available)
+        this.alts = []
     }
 
     addAlt(altName, altClass, lootSpecs, available) {
-        let alt = new RaidMember(altName, altClass, lootSpecs, available);
-        this.alts.push(alt);
-        return alt;
+        let alt = new RaidMember(altName, altClass, lootSpecs, available)
+        this.alts.push(alt)
+        return alt
     }
+}
 
+class Reservation {
+    constructor(service, buyerName, boosters) {
+        this.service = service
+        this.buyerName = buyerName
+        this.boosters = boosters
+    }
 }
