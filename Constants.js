@@ -1,3 +1,24 @@
+const MESSAGES = {
+    DEFAULT: "DEFAULT",
+    SUCCESS: "SUCCESS",
+    FAILURE: "FAILURE",
+    ERROR: "ERROR"
+}
+
+const MESSAGE_COLORS = {
+    DEFAULT: "#000000",
+    SUCCESS: "#6AA84F",
+    FAILURE: "#CC0000",
+    ERROR: "#46BDC6"
+}
+
+const MESSAGE_WEIGHTS = {
+    DEFAULT: "normal",
+    SUCCESS: "bold",
+    FAILURE: "bold",
+    ERROR: "bold"
+}
+
 const CLASSES = {
     "WARRIOR" : 1,
     "PALADIN" : 2,
@@ -28,43 +49,6 @@ const SPECIALIZATIONS = {
     12 : ["HAVOC", "VENGEANCE"]
 };
 
-//TODO: Change left side to numbers, then use CLASS_ARMORTYPES[CLASSES[this.playerClass.toUpperCase()]]
-const CLASS_ARMORTYPES = {
-    "WARRIOR"       : "PLATE",
-    "PALADIN"       : "PLATE",
-    "HUNTER"        : "MAIL",
-    "ROGUE"         : "LEATHER",
-    "PRIEST"        : "CLOTH",
-    "DEATH KNIGHT"  : "PLATE",
-    "SHAMAN"        : "MAIL",
-    "MAGE"          : "CLOTH",
-    "WARLOCK"       : "CLOTH",
-    "MONK"          : "LEATHER",
-    "DRUID"         : "LEATHER",
-    "DEMON HUNTER"  : "LEATHER"
-};
-
-const STATS = {
-    STR : "STRENGTH",
-    AGI : "AGILITY",
-    INT : "INTELLECT"
-};
-
-const SPEC_STATS = {
-    1 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR },
-    2 : { 0:STATS.INT, 1:STATS.STR, 2:STATS.STR },
-    3 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
-    4 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
-    5 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
-    6 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR},
-    7 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.INT},
-    8 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
-    9 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
-    10 : { 0:STATS.AGI, 1:STATS.INT, 2:STATS.AGI},
-    11 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.AGI, 3:STATS.INT},
-    12 : { 0:STATS.AGI, 1:STATS.AGI}
-};
-
 const TOKENS = {
     1 : "ABOMINABLE",
     2 : "MYSTIC",
@@ -72,20 +56,29 @@ const TOKENS = {
     4 : "ZENITH"
 }
 
-//TODO: Change left side to numbers, then use CLASS_TOKENS[CLASSES[this.playerClass]]
-const CLASS_TOKENS = {
-    "WARRIOR"       : "ZENITH",
-    "PALADIN"       : "VENERATED",
-    "HUNTER"        : "MYSTIC",
-    "ROGUE"         : "ZENITH",
-    "PRIEST"        : "VENERATED",
-    "DEATH KNIGHT"  : "ABOMINABLE",
-    "SHAMAN"        : "VENERATED",
-    "MAGE"          : "MYSTIC",
-    "WARLOCK"       : "ABOMINABLE",
-    "MONK"          : "ZENITH",
-    "DRUID"         : "MYSTIC",
-    "DEMON HUNTER"  : "ABOMINABLE"
+const BOSSES = {
+    0: "SHRIEKWING",
+    1: "HUNTSMAN ALTIMOR",
+    2: "SUN KING'S SALVATION",
+    3: "ARTIFICER XY'MOX",
+    4: "HUNGERING DESTROYER",
+    5: "LADY INERVA DARKVEIN",
+    6: "THE COUNCIL OF BLOOD",
+    7: "SLUDGEFIST",
+    8: "STONE LEGION GENERALS",
+    9: "SIRE DENATHRIUS"
+}
+
+const FUNNEL_TYPES = {
+    ARMOR : "ARMOR FUNNEL",
+    WEAPON : "WEAPON FUNNEL",
+    TRINKET : "TRINKET FUNNEL"
+}
+
+const STATS = {
+    STR : "STRENGTH",
+    AGI : "AGILITY",
+    INT : "INTELLECT"
 };
 
 const TRINKETS = {
@@ -107,7 +100,84 @@ const TRINKETS = {
     15 : "DREADFIRE VESSEL"
 };
 
-/** Lists of trinkets that each class/spec combination can use */
+/**
+ * ----- ALL CONSTANTS BELOW THIS LINE ARE USED FOR RELATIONAL PURPOSES ONLY (EG, WHAT ARMOR TYPES ARE EACH CLASS?)
+ * Obviously one day hope to bring it into a database to avoid this fiasco...
+ */
+
+const BOSS_TRINKETS = {
+    "SHRIEKWING": [TRINKETS[0]],
+    "HUNTSMAN ALTIMOR": [TRINKETS[1]],
+    "SUN KING'S SALVATION": [TRINKETS[5], TRINKETS[6], TRINKETS[7]],
+    "ARTIFICER XY'MOX": [TRINKETS[4]],
+    "HUNGERING DESTROYER": [TRINKETS[2], TRINKETS[3]],
+    "LADY INERVA DARKVEIN": [TRINKETS[8]],
+    "THE COUNCIL OF BLOOD": [TRINKETS[9]],
+    "SLUDGEFIST": [TRINKETS[10]],
+    "STONE LEGION GENERALS": [TRINKETS[11]],
+    "SIRE DENATHRIUS": [TRINKETS[12], TRINKETS[13], TRINKETS[14], TRINKETS[15]],
+}
+
+const BOSS_WEAPONS = {
+    "SHRIEKWING": [],
+    "HUNTSMAN ALTIMOR": [TOKENS[2]],
+    "SUN KING'S SALVATION": [TOKENS[1]],
+    "ARTIFICER XY'MOX": [],
+    "HUNGERING DESTROYER": [TOKENS[3]],
+    "LADY INERVA DARKVEIN": [],
+    "THE COUNCIL OF BLOOD": [TOKENS[4]],
+    "SLUDGEFIST": [],
+    "STONE LEGION GENERALS": [],
+    "SIRE DENATHRIUS": [TOKENS[1], TOKENS[2], TOKENS[3], TOKENS[4]],
+}
+
+//TODO: Change left side to numbers, then use CLASS_ARMORTYPES[CLASSES[this.playerClass.toUpperCase()]]
+const CLASS_ARMORTYPES = {
+    "WARRIOR"       : "PLATE",
+    "PALADIN"       : "PLATE",
+    "HUNTER"        : "MAIL",
+    "ROGUE"         : "LEATHER",
+    "PRIEST"        : "CLOTH",
+    "DEATH KNIGHT"  : "PLATE",
+    "SHAMAN"        : "MAIL",
+    "MAGE"          : "CLOTH",
+    "WARLOCK"       : "CLOTH",
+    "MONK"          : "LEATHER",
+    "DRUID"         : "LEATHER",
+    "DEMON HUNTER"  : "LEATHER"
+};
+
+//TODO: Change left side to numbers, then use CLASS_TOKENS[CLASSES[this.playerClass]]
+const CLASS_TOKENS = {
+    "WARRIOR"       : "ZENITH",
+    "PALADIN"       : "VENERATED",
+    "HUNTER"        : "MYSTIC",
+    "ROGUE"         : "ZENITH",
+    "PRIEST"        : "VENERATED",
+    "DEATH KNIGHT"  : "ABOMINABLE",
+    "SHAMAN"        : "VENERATED",
+    "MAGE"          : "MYSTIC",
+    "WARLOCK"       : "ABOMINABLE",
+    "MONK"          : "ZENITH",
+    "DRUID"         : "MYSTIC",
+    "DEMON HUNTER"  : "ABOMINABLE"
+};
+
+const SPEC_STATS = {
+    1 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR },
+    2 : { 0:STATS.INT, 1:STATS.STR, 2:STATS.STR },
+    3 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
+    4 : { 0:STATS.AGI, 1:STATS.AGI, 2:STATS.AGI },
+    5 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    6 : { 0:STATS.STR, 1:STATS.STR, 2:STATS.STR},
+    7 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.INT},
+    8 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    9 : { 0:STATS.INT, 1:STATS.INT, 2:STATS.INT},
+    10 : { 0:STATS.AGI, 1:STATS.INT, 2:STATS.AGI},
+    11 : { 0:STATS.INT, 1:STATS.AGI, 2:STATS.AGI, 3:STATS.INT},
+    12 : { 0:STATS.AGI, 1:STATS.AGI}
+};
+
 const SPEC_TRINKETS = {
     1 : { //WARRIOR
         0 : [ //ARMS
@@ -394,7 +464,6 @@ const SPEC_TRINKETS = {
         ] },
 };
 
-/** List of class/specs that can use each trinket */
 const TRINKET_SPECS = {
     "SKULKER'S WING": {
         1: {0: true, 1: true, 2: false},
@@ -622,46 +691,21 @@ const TRINKET_SPECS = {
     }
 }
 
-const FUNNEL_TYPES = {
-    ARMOR : "ARMOR FUNNEL",
-    WEAPON : "WEAPON FUNNEL",
-    TRINKET : "TRINKET FUNNEL"
-}
-
-const BOSSES = {
-    0: "SHRIEKWING",
-    1: "HUNTSMAN ALTIMOR",
-    2: "SUN KING'S SALVATION",
-    3: "ARTIFICER XY'MOX",
-    4: "HUNGERING DESTROYER",
-    5: "LADY INERVA DARKVEIN",
-    6: "THE COUNCIL OF BLOOD",
-    7: "SLUDGEFIST",
-    8: "STONE LEGION GENERALS",
-    9: "SIRE DENATHRIUS"
-}
-
-const BOSS_TRINKETS = {
-    "SHRIEKWING": [TRINKETS[0]],
-    "HUNTSMAN ALTIMOR": [TRINKETS[1]],
-    "SUN KING'S SALVATION": [TRINKETS[5], TRINKETS[6], TRINKETS[7]],
-    "ARTIFICER XY'MOX": [TRINKETS[4]],
-    "HUNGERING DESTROYER": [TRINKETS[2], TRINKETS[3]],
-    "LADY INERVA DARKVEIN": [TRINKETS[8]],
-    "THE COUNCIL OF BLOOD": [TRINKETS[9]],
-    "SLUDGEFIST": [TRINKETS[10]],
-    "STONE LEGION GENERALS": [TRINKETS[11]],
-    "SIRE DENATHRIUS": [TRINKETS[12], TRINKETS[13], TRINKETS[14], TRINKETS[15]],
-}
-const BOSS_WEAPONS = {
-    "SHRIEKWING": [],
-    "HUNTSMAN ALTIMOR": [TOKENS[2]],
-    "SUN KING'S SALVATION": [TOKENS[1]],
-    "ARTIFICER XY'MOX": [],
-    "HUNGERING DESTROYER": [TOKENS[3]],
-    "LADY INERVA DARKVEIN": [],
-    "THE COUNCIL OF BLOOD": [TOKENS[4]],
-    "SLUDGEFIST": [],
-    "STONE LEGION GENERALS": [],
-    "SIRE DENATHRIUS": [TOKENS[1], TOKENS[2], TOKENS[3], TOKENS[4]],
+const TRINKET_BOSSES = {
+    "SKULKER'S WING": BOSSES[0],
+    "BARGAST'S LEASH": BOSSES[1],
+    "GLUTTINOUS SPIKE": BOSSES[4],
+    "CONSUMPTIVE INFUSION": BOSSES[4],
+    "GLYPH OF ASSIMILATION": BOSSES[3],
+    "SPLINTERED HEART OF AL'AR": BOSSES[2],
+    "TUFT OF SMOULDERING PLUMAGE": BOSSES[2],
+    "SOUL IGNITER": BOSSES[2],
+    "MEMORY OF PAST SINS": BOSSES[5],
+    "MACABRE SHEET MUSIC": BOSSES[6],
+    "HATEFUL CHAIN": BOSSES[7],
+    "STONE LEGION HERALDRY": BOSSES[8],
+    "SANGUINE VINTAGE": BOSSES[9],
+    "CABALIST'S HYMNAL": BOSSES[9],
+    "MANABOUND MIRROR": BOSSES[9],
+    "DREADFIRE VESSEL": BOSSES[9],
 }
