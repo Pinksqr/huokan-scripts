@@ -10,10 +10,11 @@ function onEdit(event){
     updateRaidRoster(sheet, range)
 
     //Reservation sheet updates
-    handleServiceInformationDropDowns(sheet, range)
+    updateReservationSpecDropdown(sheet, range, value)
+    updateReservationServiceInfoDropdowns(sheet, range)
 
-    //Reservation
-    //handleReservations()
+    //Reservations
+    handleReservations(sheet, range, value)
 }
 
 /**
@@ -157,7 +158,7 @@ function updateRaidRoster(sheet, range){
         }
 
         function updateValues(values, rangeArray){
-            for (const value in values){
+            for (const value in values) {
                 raidInfoSheet.getRange(rangeArray[value]).setValue(values[value])
             }
         }
@@ -195,7 +196,7 @@ function updateReservationSpecDropdown(sheet, range, value){
  * @param sheet
  * @param range
  */
-function handleServiceInformationDropDowns(sheet, range) {
+function updateReservationServiceInfoDropdowns(sheet, range) {
     let sheetName = sheet.getName()
     if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
         let row = range.getRow()
@@ -335,70 +336,183 @@ function handleServiceInformationDropDowns(sheet, range) {
 }
 
 /**
+ * Creates a sheet to book reservations
+ */
+function createReservationSheet(){
+    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    let templateSheet = spreadsheet.getSheetByName("Reservation Template")
+    let raidInfoSheet = spreadsheet.getSheetByName("Raid Information")
+
+    let newSheet = templateSheet.copyTo(spreadsheet)
+    let newSheetName = raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.DATE).getDisplayValue()
+
+    if (newSheetName && !spreadsheet.getSheetByName(newSheetName)) {
+        newSheet.setName(newSheetName)
+        newSheet.activate()
+        spreadsheet.moveActiveSheet(5)
+    }
+
+    let raidRoster = properties.getProperty("raidRoster")
+    Logger.log(raidRoster)
+
+    if (raidRoster) {
+        newSheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).clearContent().setValue(raidRoster)
+    }
+    newSheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify([]))
+    newSheet.getRange(CELLS_RESERVATIONS_INFO.GUILD_INFO).setValue(raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.CONCAT).getValue())
+
+    //Currently not copying class data; too much clutter
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_CARRIES, newSheet, CELLS_RESERVATIONS_CARRIES)
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES)
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_MAINSTATS, newSheet, CELLS_RESERVATIONS_MAINSTATS)
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
+
+    function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
+        for (let cell in sourceCells) {
+            let value = sourceSheet.getRange(sourceCells[cell]).getValue()
+            destSheet.getRange(destCells[cell].MAX).setValue(value)
+        }
+    }
+}
+
+/**
  * Handles reserving a spot when the reservation check-box is checked (or unchecked)
  * @param sheet
  * @param range
  * @param value
  */
 function handleReservations(sheet, range, value){
+    //Declared here so rest of function has scope on these variables instead of passing all the way down
     let sheetName = sheet.getName()
+    let row = range.getRow()
+    let col = range.getColumn()
 
     if(sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
-        let row = range.getRow()
-        let col = range.getColumn()
-
         if (row > 7 && col === COLUMNS_RESERVATIONS.CHECKBOX) {
+            //TODO: Remove hard-coded cell location
+            let response
+            let raidRoster = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).getValue())
+            let reservations = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).getValue())
+            let buyer = {
+                buyerName   : sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_NAME).getValue(),
+                className   : sheet.getRange(row, COLUMNS_RESERVATIONS.CLASS).getValue().toUpperCase(),
+                service     : sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE).getValue().toUpperCase(),
+                funnels     : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS).getValue(),
+                funnelType  : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_TYPE).getValue().toUpperCase(),
+                funnelOpt   : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION).getValue().toUpperCase(),
+            }
+
             //Determine if this is a reservation request, or a cancellation request
             if (range.isChecked()) {
-                handleReservation()
+                response = handleReservation(raidRoster, reservations, buyer)
             } else {
-                handleCancellation()
+                response = handleCancellation(raidRoster, reservations, buyer)
+            }
+
+            //Send a message with the status of the reservation before updating the other data
+            sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
+
+            //The response tells us if an update on the data needs to be done
+            if (response.isUpdate){
+                updateReservationSheet(raidRoster, reservations, buyer, response)
             }
         }
     }
 
-    function handleReservation(){
-    }
+    function handleReservation(raidRoster, reservations, buyer){
+        Logger.log("Handling reservation...")
+        let reserved = false
+        //Is there a carry spot?
+        if (isSpotAvailable()){
+            //Is it a carry, or a funnel?
+            if (buyer.funnels > 0){
+                return reserveFunnel()
+            }else{
+                return reserveCarry()
+            }
+        } else {
+            return new ReservationResponse (false, MESSAGES.FAILURE, "No spots available")
+        }
 
-    function handleCancellation(){
-    }
-}
+        /** Checks if a carry spot is available for the reservation request */
+        function isSpotAvailable(){
+            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_CARRIES[buyer.service].AVAIL).getValue()
+            return availableCarries > 0 ? true : false
+        }
 
-function createReservationSheet(){
-    let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let templateSheet = spreadsheet.getSheetByName("Reservation Template");
-    let raidInfoSheet = spreadsheet.getSheetByName("Raid Information");
+        /** Creates a funnel (+carry) reservation */
+        function reserveFunnel(){
+            switch(buyer.service){
+                case FUNNEL_TYPES.ARMOR:
+                    reserveArmorFunnel()
+                    break;
+                case FUNNEL_TYPES.WEAPON:
+                    reserveWeaponFunnel()
+                    break;
+                case FUNNEL_TYPES.TRINKET:
+                    reserveTrinketFunnel()
+                    break;
+                default:
+                    sendMessage(sheet, row, "Error: Could not find funnel type; Please see admin", "bold", MESSAGE_COLORS.ERROR)
+            }
 
-    let newSheet = templateSheet.copyTo(spreadsheet);
-    let newSheetName = raidInfoSheet.getRange(CELLS_RESERVATIONS_INFO.DATE).getDisplayValue();
+            function reserveArmorFunnel(){
 
-    if (newSheetName && !spreadsheet.getSheetByName(newSheetName)) {
-        newSheet.setName(newSheetName);
-        newSheet.activate();
-        spreadsheet.moveActiveSheet(5);
-    }
+            }
 
-    let raidRoster = properties.getProperty("raidRoster");
-    Logger.log(raidRoster);
+            function reserveWeaponFunnel(){
 
-    if (raidRoster) {
-        newSheet.getRange("A1").clearContent().setValue(raidRoster);
-    }
+            }
 
-    //Currently not copying class data; too much clutter
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_CARRIES, newSheet, CELLS_RESERVATIONS_CARRIES);
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES);
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_MAINSTATS, newSheet, CELLS_RESERVATIONS_MAINSTATS);
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS);
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS);
+            function reserveTrinketFunnel(){
 
-    function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
-        for (let cell in sourceCells) {
-            let value = sourceSheet.getRange(sourceCells[cell]).getValue();
-            destSheet.getRange(destCells[cell].MAX).setValue(value);
+            }
+        }
+
+        /** Creates a carry reservation */
+        function reserveCarry(){
+            Logger.log("Reserving carry...")
+            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_CARRIES[buyer.service].AVAIL).getValue()
+
+            if (availableCarries > 0){
+                let reservation = new Reservation(buyer.service, 0, null, null, buyer.buyerName, null);
+                reservations.push(reservation)
+                return new ReservationResponse(true, MESSAGES.SUCCESS, "Reserved")
+            } else {
+                return new ReservationResponse()
+            }
         }
     }
+
+    function handleCancellation(raidRoster, reservations, buyer){
+        return false
+    }
+
+    function updateReservationSheet(raidRoster, reservations, buyer){
+        sheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).clearContent().setValue(JSON.stringify(raidRoster))
+        sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify(reservations))
+
+        let maxValues = getMaxValues(sheet, raidRoster, reservations)
+
+        updateValues(CELLS_RESERVATIONS_CARRIES, maxValues.carries);
+
+        function updateValues(rangeArray, values){
+            for (const index in values){
+                Logger.log("Setting " + rangeArray[index].AVAIL + " to " + values[index])
+                sheet.getRange(rangeArray[index].AVAIL).clearContent().setValue(values[index]);
+            }
+        }
+    }
+
+    function sendMessage(sheet, row, message, fontWeight, fontColor){
+        sheet.getRange(row, COLUMNS_RESERVATIONS.STATUS).clearContent().setValue(message)
+        sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.STATUS - COLUMNS_RESERVATIONS.SERVICE + 1))
+            .setFontWeight(fontWeight)
+            .setFontColor(fontColor)
+    }
 }
+
 
 /** -- Helper functions -- **/
 
@@ -417,32 +531,38 @@ function arrayToTitleCase(strArray) {
 
 function getMaxValues(sheet, raidRoster, reservations){
     let sheetName = sheet.getName();
-    let carryRange = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ? CELLS_RAIDINFO_CARRIES : CELLS_RESERVATIONS_CARRIES
-    let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ? "Raid Information" : null
+    //let carryRange = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ? CELLS_RAIDINFO_CARRIES : CELLS_RESERVATIONS_CARRIES
+    //let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ? "Raid Information" : null
 
     let maxValues = {
         carries      : getMaxCarries(),
+        weaponTokens : getMaxWeaponTokens(),
+        trinkets     : getMaxTrinkets(),
         armorTypes   : {},
         mainStats    : {},
-        classNames   : {},
-        weaponTokens : getMaxWeaponTokens(),
-        trinkets     : getMaxTrinkets()
+        classNames   : {}
     }
+
+    return maxValues
 
     function getMaxCarries(){
         let maxCarries = {}
-        for (let index in BOSSES){
-            let carryLoc = carrySheet ? SpreadsheetApp.getActiveSpreadsheet().getSheetByName(carrySheet) : sheet
-            let maxCarry = carryLoc.getRange(carryRange[BOSSES[index]]).getValue()
 
+        let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
+            SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information") : sheet
+        let carryRange = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
+            CELLS_RAIDINFO_CARRIES : CELLS_RESERVATIONS_CARRIES
+
+        for (let bossIndex in BOSSES){
+            let maxCarry = carrySheet.getRange(carryRange[BOSSES[bossIndex]].MAX).getValue()
             if (maxCarry > 0) {
-                for (let index in reservations) {
-                    if (BOSSES[index] === reservations[index].service) {
+                for (let resIndex in reservations) {
+                    if (BOSSES[bossIndex] === reservations[resIndex].service) {
                         maxCarry--
                     }
                 }
             }
-            maxCarries[BOSSES[index]] = maxCarry
+            maxCarries[BOSSES[bossIndex]] = maxCarry
         }
         Logger.log(maxCarries)
         return maxCarries
@@ -450,24 +570,26 @@ function getMaxValues(sheet, raidRoster, reservations){
 
     function getMaxWeaponTokens(){
         let maxWeaponTokens = {}
-        let weaponTokenAdded = false
         //For each boss
         for (let index in BOSSES){
             let boss = BOSSES[index]
             //For each token of that boss
             for (let index in BOSS_WEAPONS[boss]){
                 let weaponToken = BOSS_WEAPONS[boss][index]
+
                 if (weaponToken){
                     //For each player on the raid roster
                     for (let index in raidRoster){
                         //If they can loot the token, add to list
                         let player = raidRoster[index]
+                        let weaponTokenAdded = false
+
                         if (isBossTokenLootable(boss, weaponToken, player)){
-                            maxWeaponTokens[weaponToken] = maxWeaponTokens[weaponToken] + 1 || 1;
+                            maxWeaponTokens[weaponToken] = maxWeaponTokens[weaponToken] + 1 || 1
                             weaponTokenAdded = true
                         } else{
                             for (let index in player.alts){
-                                if (isBossTokenLootable(boss, weaponToken, raidRoster[index].alts[index]) && !weaponTokenAdded){
+                                if (isBossTokenLootable(boss, weaponToken, player.alts[index]) && !weaponTokenAdded){
                                     maxWeaponTokens[weaponToken] = maxWeaponTokens[weaponToken] + 1 || 1;
                                     weaponTokenAdded = true
                                 }
@@ -490,14 +612,36 @@ function getMaxValues(sheet, raidRoster, reservations){
         }
     }
 
-    function getMaxTrinkets() {
+    function getMaxTrinkets(){
+        let maxTrinkets = {}
+        let trinketAdded = false
         for (let index in TRINKETS){
             let trinket = TRINKETS[index]
             for (let index in raidRoster){
                 let player = raidRoster[index]
-                let playerTrinkets = getPlayerTrinkets(player)
-                for (let index in playerTrinkets){
+                if (isTrinketLootable(trinket, player)){
+                    maxTrinkets[trinket] = maxTrinkets[trinket] + 1 || 1
+                    trinketAdded = true
+                } else{
+                    for (let index in player.alts){
+                        if (isTrinketLootable(trinket, player.alts[index]) && !trinketAdded){
+                            maxTrinkets[trinket] = maxTrinkets[trinket] + 1 || 1
+                            trinketAdded = true
+                        }
+                    }
+                }
+            }
+        }
+        Logger.log(maxTrinkets)
+        return maxTrinkets
 
+        function isTrinketLootable(trinket, player){
+            if (!isPlayerReserved(player, TRINKET_BOSSES[trinket])){
+                let playerTrinkets = getPlayerTrinkets(player) //Returns lootable trinkets by player
+                for (let index in playerTrinkets){
+                    if (trinket === playerTrinkets[index]){
+                        return true
+                    }
                 }
             }
         }
