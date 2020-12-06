@@ -3,7 +3,8 @@
 const CELLS_RAIDINFO_INFO = {
     "GUILD" : "C7",
     "DATE" : "C8",
-    "TIME" : "C9"
+    "TIME" : "C9",
+    "CONCAT" : "C10"
 };
 
 const CELLS_RAIDINFO_CARRIES = {
@@ -17,19 +18,6 @@ const CELLS_RAIDINFO_CARRIES = {
     "SLUDGEFIST"            : "F15",
     "STONE LEGION GENERALS" : "F16",
     "SIRE DENATHRIUS"       : "F17",
-};
-
-const CELLS_RAIDINFO_FUNNELS = {
-    "SHRIEKWING"            : "G8",
-    "HUNTSMAN ALTIMOR"      : "G9",
-    "SUN KING'S SALVATION"  : "G10",
-    "ARTIFICER XY'MOX"      : "G11",
-    "HUNGERING DESTROYER"   : "G12",
-    "LADY INERVA DARKVEIN"  : "G13",
-    "THE COUNCIL OF BLOOD"  : "G14",
-    "SLUDGEFIST"            : "G15",
-    "STONE LEGION GENERALS" : "G16",
-    "SIRE DENATHRIUS"       : "G17",
 };
 
 const CELLS_RAIDINFO_CLASSES = {
@@ -87,6 +75,11 @@ const CELLS_RAIDINFO_TRINKETS = {
 };
 
 /** RESERVATION TEMPLATE SHEET */
+
+const CELLS_RESERVATIONS_JSON = {
+    RAID_ROSTER : "A1",
+    RESERVATIONS: "A2"
+}
 
 const CELLS_RESERVATIONS_INFO = {
     "GUILD_INFO" : "B3"
@@ -190,7 +183,11 @@ const COLUMNS_RAIDALTS = {
 };
 
 const COLUMNS_RESERVATIONS = {
+    INDEX           : 6,
+    ADVERTISER_NAME : 7,
     BUYER_NAME      : 9,
+    BUYER_BTAG      : 10,
+    BUYER_DISCID    : 11,
     CLASS           : 12,
     SPEC            : 13,
     SERVICE         : 15,
@@ -198,5 +195,6 @@ const COLUMNS_RESERVATIONS = {
     FUNNEL_TYPE     : 17,
     FUNNEL_OPTION   : 18,
     NOTE            : 19,
-    CHECKBOX        : 20
+    CHECKBOX        : 20,
+    STATUS          : 21
 };
