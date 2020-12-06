@@ -35,9 +35,20 @@ class RaidMain extends RaidMember {
 }
 
 class Reservation {
-    constructor(service, buyerName, boosters) {
+    constructor(service, funnels, funnelType, funnelOption, buyerName, boosters) {
         this.service = service
+        this.funnels = funnels
+        this.funnelType = funnelType
+        this.funnelOption = funnelOption
         this.buyerName = buyerName
         this.boosters = boosters
+    }
+}
+
+class ReservationResponse {
+    constructor(isUpdate, status, message) {
+        this.isUpdate = isUpdate
+        this.status = status
+        this.message = message
     }
 }
