@@ -372,7 +372,7 @@ function createReservationSheet(){
     newSheet.getRange(CELLS_RESERVATIONS_INFO.GUILD_INFO).setValue(raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.CONCAT).getValue())
 
     //Currently not copying class data; too much clutter
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_CARRIES, newSheet, CELLS_RESERVATIONS_CARRIES)
+    copyCells(raidInfoSheet, CELLS_RAIDINFO_BOSSES, newSheet, CELLS_RESERVATIONS_BOSSES)
     copyCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES)
     copyCells(raidInfoSheet, CELLS_RAIDINFO_MAINSTATS, newSheet, CELLS_RESERVATIONS_MAINSTATS)
     copyCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
@@ -474,12 +474,12 @@ function handleReservations(sheet, range, value){
                 return reserveCarry()
             }
         } else {
-            return new ReservationResponse (false, MESSAGES.FAILURE, "No spots available")
+            return new ReservationResponse (false, MESSAGES.FAILURE, "Not enough spots available")
         }
 
         /** Checks if a carry spot is available for the reservation request */
         function isSpotAvailable(){
-            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_CARRIES[buyer.service].AVAIL).getValue()
+            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_BOSSES[buyer.service].AVAIL).getValue()
             return availableCarries > 0 ? true : false
         }
 
@@ -512,15 +512,16 @@ function handleReservations(sheet, range, value){
         /** Creates a carry reservation */
         function reserveCarry(){
             Logger.log("Reserving carry...")
-            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_CARRIES[buyer.service].AVAIL).getValue()
+            //Dont think this is needed since we already check if there's enough spots already
+            /*let availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue()
 
-            if (availableCarries > 0){
+            if (availableCarries > 0){*/
                 let reservation = new Reservation(buyer.service, 0, null, null, buyer.buyerName, null);
                 reservations.push(reservation)
                 return new ReservationResponse(true, MESSAGES.SUCCESS, "Reserved")
-            } else {
+            /*} else {
                 return new ReservationResponse()
-            }
+            }*/
         }
     }
 
@@ -545,7 +546,7 @@ function handleReservations(sheet, range, value){
         sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify(reservations))
 
         let maxValues = getMaxValues(sheet, raidRoster, reservations)
-        updateValues(CELLS_RESERVATIONS_CARRIES, maxValues.carries)
+        updateValues(CELLS_RESERVATIONS_BOSSES, maxValues.carries)
         updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
         updateValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
 
@@ -627,14 +628,29 @@ function getMaxValues(sheet, raidRoster, reservations){
         let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
             SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information") : sheet
         let carryRange = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
-            CELLS_RAIDINFO_CARRIES : CELLS_RESERVATIONS_CARRIES
+            CELLS_RAIDINFO_BOSSES : CELLS_RESERVATIONS_BOSSES
 
         for (let bossIndex in BOSSES){
             let maxCarry = carrySheet.getRange(carryRange[BOSSES[bossIndex]].MAX).getValue()
             if (maxCarry > 0) {
                 for (let resIndex in reservations) {
-                    if (BOSSES[bossIndex] === reservations[resIndex].service) {
-                        maxCarry--
+                    let reservation = reservations[resIndex]
+                    switch (reservation.service){
+                        case SERVICES.FULL_CLEAR:
+                            maxCarry--
+                            break;
+                        case SERVICES.LAST_WING:
+                            if (
+                                BOSSES[bossIndex] === SERVICES.SLUDGEFIST ||
+                                BOSSES[bossIndex] === SERVICES.STONE_LEGION_GENERALS ||
+                                BOSSES[bossIndex] === SERVICES.SIRE_DENATHRIUS
+                            ){  maxCarry-- }
+                            break;
+                        default:
+                            if (BOSSES[bossIndex] === reservations[resIndex].service) {
+                                maxCarry--
+                            }
+                            break;
                     }
                 }
             }
@@ -646,85 +662,141 @@ function getMaxValues(sheet, raidRoster, reservations){
 
     function getMaxWeaponTokens(){
         let maxWeaponTokens = {}
-        //For each boss
-        for (let index in BOSSES){
-            let boss = BOSSES[index]
-            //For each token of that boss
-            for (let index in BOSS_WEAPONS[boss]){
-                let weaponToken = BOSS_WEAPONS[boss][index]
 
-                if (weaponToken){
-                    //For each player on the raid roster
-                    for (let index in raidRoster){
-                        //If they can loot the token, add to list
-                        let player = raidRoster[index]
-                        let weaponTokenAdded = false
+        for (let bossIndex in BOSSES){
+            let boss = BOSSES[bossIndex]
+            for (let tokenIndex in BOSS_WEAPONS[boss]){
+                let token = BOSS_WEAPONS[boss][tokenIndex]
+                if (token){
+                    for (let playerIndex in raidRoster){
+                        let player = raidRoster[playerIndex]
 
-                        if (isBossTokenLootable(boss, weaponToken, player)){
-                            maxWeaponTokens[weaponToken] = maxWeaponTokens[weaponToken] + 1 || 1
-                            weaponTokenAdded = true
-                        } else{
-                            for (let index in player.alts){
-                                if (isBossTokenLootable(boss, weaponToken, player.alts[index]) && !weaponTokenAdded){
-                                    maxWeaponTokens[weaponToken] = maxWeaponTokens[weaponToken] + 1 || 1;
-                                    weaponTokenAdded = true
-                                }
+                        if (!isPlayerReserved(boss, player)){
+                            if (isSpecAvailable(player) && isTokenLootable(token, boss, player)){
+                                maxWeaponTokens[token] = maxWeaponTokens[token] + 1 || 1
                             }
                         }
                     }
                 }
             }
         }
-        Logger.log(maxWeaponTokens)
-        return maxWeaponTokens
 
-        /** Returns true if, for a certain boss & token, a player:
-         * Can loot that token, is not reserved to this boss, and has at least 1 loot spec available
-         */
-        function isBossTokenLootable(boss, weaponToken, player){
-            return (weaponToken === CLASS_TOKENS[player.playerClass] &&
-                !isPlayerReserved(player.playerName, boss) &&
-                isSpecAvailable(player))
+        /** The token is lootable if the player, or any of their alts, can loot the token from the specific boss */
+        function isTokenLootable(token, boss, player){
+            if (token === CLASS_TOKENS[player.playerClass]){
+                return true
+            } else {
+                for (let altIndex in player.alts){
+                    let alt = player.alts[altIndex]
+                    if (token === CLASS_TOKENS[alt.playerClass]){
+                        return true
+                    }
+                }
+            }
+            return false
         }
+
     }
 
     function getMaxTrinkets(){
         let maxTrinkets = {}
-        let trinketAdded = false
-        for (let index in TRINKETS){
-            let trinket = TRINKETS[index]
-            for (let index in raidRoster){
-                let player = raidRoster[index]
-                if (isTrinketLootable(trinket, player)){
-                    maxTrinkets[trinket] = maxTrinkets[trinket] + 1 || 1
-                    trinketAdded = true
-                } else{
-                    for (let index in player.alts){
-                        if (isTrinketLootable(trinket, player.alts[index]) && !trinketAdded){
-                            maxTrinkets[trinket] = maxTrinkets[trinket] + 1 || 1
-                            trinketAdded = true
+
+        for (let bossIndex in BOSSES){
+            let boss = BOSSES[bossIndex]
+            for (let trinketIndex in TRINKETS){
+                let trinket = BOSS_TRINKETS[boss][trinketIndex]
+                if (trinket){
+                    for (let playerIndex in raidRoster){
+                        let player = raidRoster[playerIndex]
+
+                        if(!isPlayerReserved(boss, player)){
+                            if (isTrinketLootable(trinket, boss, player)){
+
+                            }
                         }
                     }
                 }
             }
         }
-        Logger.log(maxTrinkets)
+
         return maxTrinkets
 
+        /** The trinket is lootable if the player, or any alts, can loot the trinket on any chosen spec */
         function isTrinketLootable(trinket, player){
-            if (!isPlayerReserved(player, TRINKET_BOSSES[trinket])){
-                let playerTrinkets = getPlayerTrinkets(player) //Returns lootable trinkets by player
-                for (let index in playerTrinkets){
-                    if (trinket === playerTrinkets[index]){
+            let playerTrinkets = getLootableTrinkets(player)
+
+
+            for (let index in playerTrinkets){
+                if (trinket === playerTrinkets[index]){
+                    return true
+                }
+            }
+
+            for (let altIndex in player.alts){
+                let altTrinkets = getLootableTrinkets(player.alts[altIndex])
+                for (let trinketIndex in altTrinkets){
+                    if (trinket === altTrinkets[trinketIndex]){
                         return true
                     }
+                }
+            }
+
+            return false
+
+            function getLootableTrinkets(player){
+                let trinkets = []
+                for (let index in player.lootSpecs) {
+                    if (player.lootSpecs[index]) {
+                        let specTrinkets = SPEC_TRINKETS[CLASSES[player.playerClass]][index];
+
+                        if (index && specTrinkets) {
+                            specTrinkets.forEach(function (trinket) {
+                                trinkets.push(trinket);
+                            })
+                        }
+                    }
+                }
+                return trinkets;
+            }
+        }
+    }
+
+    /** ----Helpers for getMaxValues()---- */
+
+    /** The player is reserved if their main, or any of their alts, match any of the reservations' booster lists.
+     * Note that each booster in a reservation, even if they are an alt, will have a main name */
+    function isPlayerReserved(boss, player){
+        for (let index in reservations){
+            let boosters = reservations[index].boosters
+
+            switch (reservations.service){
+                case SERVICES.FULL_CLEAR:
+                    return isPlayerBooster(player, boosters)
+                    break;
+                case SERVICES.LAST_WING:
+                    if (boss === SERVICES.SLUDGEFIST || boss == SERVICES.STONE_LEGION_GENERALS || boss == SERVICES.SIRE_DENATHRIUS){
+                        return isPlayerBooster(player, boosters)
+                    }
+                    break;
+                default:
+                    if (boss === reservations.service) {
+                        isPlayerBooster(player, boosters)
+                    }
+                    break;
+            }
+        }
+        return false
+
+        function isPlayerBooster(player, boosters){
+            for (let index in boosters){
+                if (boosters[index].mainName === player.playerName){
+                    return true
                 }
             }
         }
     }
 
-    /** Helpers for getMaxValues() */
-
+    /** A spec is available if the player has at least one spec enabled of the three */
     function isSpecAvailable(player) {
         let specAvailable = false;
         for (let spec in player.lootSpecs) {
@@ -735,32 +807,4 @@ function getMaxValues(sheet, raidRoster, reservations){
         return specAvailable;
     }
 
-    function isPlayerReserved(player, boss){
-        for (let index in reservations){
-            let reservation = reservations[index]
-            if (boss === reservation.service){
-                for (let index in reservation.boosters){
-                    if (player === reservations.boosters[index]){
-                        return true
-                    }
-                }
-            }
-        }
-    }
-
-    function getPlayerTrinkets(player){
-        let trinkets = []
-        for (let index in player.lootSpecs) {
-            if (player.lootSpecs[index]) {
-                let specTrinkets = SPEC_TRINKETS[CLASSES[player.playerClass]][index];
-
-                if (index && specTrinkets) {
-                    specTrinkets.forEach(function (trinket) {
-                        trinkets.push(trinket);
-                    })
-                }
-            }
-        }
-        return trinkets;
-    }
 }

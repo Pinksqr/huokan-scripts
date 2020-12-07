@@ -7,7 +7,7 @@ const CELLS_RAIDINFO_INFO = {
     "CONCAT" : "C10"
 };
 
-const CELLS_RAIDINFO_CARRIES = {
+const CELLS_RAIDINFO_BOSSES = {
     "SHRIEKWING"            : "F8",
     "HUNTSMAN ALTIMOR"      : "F9",
     "SUN KING'S SALVATION"  : "F10",
@@ -85,7 +85,7 @@ const CELLS_RESERVATIONS_INFO = {
     "GUILD_INFO" : "B3"
 };
 
-const CELLS_RESERVATIONS_CARRIES = {
+const CELLS_RESERVATIONS_BOSSES = {
     "SHRIEKWING"            : { MAX : "C8", AVAIL : "D8" },
     "HUNTSMAN ALTIMOR"      : { MAX : "C9", AVAIL : "D9" },
     "SUN KING'S SALVATION"  : { MAX : "C10", AVAIL : "D10" },
@@ -98,71 +98,58 @@ const CELLS_RESERVATIONS_CARRIES = {
     "SIRE DENATHRIUS"       : { MAX : "C17", AVAIL : "D17" },
 }
 
-const CELLS_RESERVATIONS_FUNNELS = {
-    "SHRIEKWING"            : { MAX : "E8", AVAIL : "F8" },
-    "HUNTSMAN ALTIMOR"      : { MAX : "E9", AVAIL : "F9" },
-    "SUN KING'S SALVATION"  : { MAX : "E10", AVAIL : "F10" },
-    "ARTIFICER XY'MOX"      : { MAX : "E11", AVAIL : "F11" },
-    "HUNGERING DESTROYER"   : { MAX : "E12", AVAIL : "F12" },
-    "LADY INERVA DARKVEIN"  : { MAX : "E13", AVAIL : "F13" },
-    "THE COUNCIL OF BLOOD"  : { MAX : "E14", AVAIL : "F14" },
-    "SLUDGEFIST"            : { MAX : "E15", AVAIL : "F15" },
-    "STONE LEGION GENERALS" : { MAX : "E16", AVAIL : "F16" },
-    "SIRE DENATHRIUS"       : { MAX : "E17", AVAIL : "F17" },
+const CELLS_RESERVATIONS_SERVICES = {
+    "SHRIEKWING"            : { MAX : "C8", AVAIL : "D8" },
+    "HUNTSMAN ALTIMOR"      : { MAX : "C9", AVAIL : "D9" },
+    "SUN KING'S SALVATION"  : { MAX : "C10", AVAIL : "D10" },
+    "ARTIFICER XY'MOX"      : { MAX : "C11", AVAIL : "D11" },
+    "HUNGERING DESTROYER"   : { MAX : "C12", AVAIL : "D12" },
+    "LADY INERVA DARKVEIN"  : { MAX : "C13", AVAIL : "D13" },
+    "THE COUNCIL OF BLOOD"  : { MAX : "C14", AVAIL : "D14" },
+    "SLUDGEFIST"            : { MAX : "C15", AVAIL : "D15" },
+    "STONE LEGION GENERALS" : { MAX : "C16", AVAIL : "D16" },
+    "SIRE DENATHRIUS"       : { MAX : "C17", AVAIL : "D17" },
+    "LAST WING"             : { MAX : "C18", AVAIL : "D18" },
+    "FULL CLEAR"            : { MAX : "C19", AVAIL : "D19" }
 }
 
 const CELLS_RESERVATIONS_ARMORTYPES = {
-    "PLATE"     : { MAX : "C20", AVAIL : "D20" },
-    "MAIL"      : { MAX : "C21", AVAIL : "D21" },
-    "LEATHER"   : { MAX : "C22", AVAIL : "D22" },
-    "CLOTH"     : { MAX : "C23", AVAIL : "D23" }
+    "PLATE"     : { MAX : "C22", AVAIL : "D22" },
+    "MAIL"      : { MAX : "C23", AVAIL : "D23" },
+    "LEATHER"   : { MAX : "C24", AVAIL : "D24" },
+    "CLOTH"     : { MAX : "C25", AVAIL : "D25" }
 };
 
 const CELLS_RESERVATIONS_MAINSTATS = {
-    "STRENGTH"  : { MAX : "C26", AVAIL : "D26" },
-    "AGILITY"   : { MAX : "C27", AVAIL : "D27" },
-    "INTELLECT" : { MAX : "C28", AVAIL : "D28" },
+    "STRENGTH"  : { MAX : "C28", AVAIL : "D28" },
+    "AGILITY"   : { MAX : "C29", AVAIL : "D29" },
+    "INTELLECT" : { MAX : "C30", AVAIL : "D30" },
 }
 
-/*const CELLS_RESERVATIONS_CLASSES = {
-    "WARRIOR"       : "C41",
-    "PALADIN"       : "C42",
-    "HUNTER"        : "C43",
-    "ROGUE"         : "C44",
-    "PRIEST"        : "C45",
-    "DEATH KNIGHT"  : "C46",
-    "SHAMAN"        : "C47",
-    "MAGE"          : "C48",
-    "WARLOCK"       : "C49",
-    "MONK"          : "C50",
-    "DRUID"         : "C51",
-    "DEMON HUNTER"  : "C52"
-};*/
-
 const CELLS_RESERVATIONS_WEAPONS = {
-    "ABOMINABLE"    : { MAX : "C31", AVAIL : "D31" },
-    "MYSTIC"        : { MAX : "C32", AVAIL : "D32" },
-    "VENERATED"     : { MAX : "C33", AVAIL : "D33" },
-    "ZENITH"        : { MAX : "C34", AVAIL : "D34" }
+    "ABOMINABLE"    : { MAX : "C33", AVAIL : "D33" },
+    "MYSTIC"        : { MAX : "C34", AVAIL : "D34" },
+    "VENERATED"     : { MAX : "C35", AVAIL : "D35" },
+    "ZENITH"        : { MAX : "C36", AVAIL : "D36" }
 };
 
 const CELLS_RESERVATIONS_TRINKETS = {
-    "SKULKER'S WING"                : { MAX : "C37", AVAIL : "D37" },
-    "BARGAST'S LEASH"               : { MAX : "C38", AVAIL : "D38" },
-    "GLUTTINOUS SPIKE"              : { MAX : "C39", AVAIL : "D39" },
-    "CONSUMPTIVE INFUSION"          : { MAX : "C40", AVAIL : "D40" },
-    "GLYPH OF ASSIMILATION"         : { MAX : "C41", AVAIL : "D41" },
-    "SPLINTERED HEART OF AL'AR"     : { MAX : "C42", AVAIL : "D42" },
-    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C43", AVAIL : "D43" },
-    "SOUL IGNITER"                  : { MAX : "C44", AVAIL : "D44" },
-    "MEMORY OF PAST SINS"           : { MAX : "C45", AVAIL : "D45" },
-    "MACABRE SHEET MUSIC"           : { MAX : "C46", AVAIL : "D46" },
-    "HATEFUL CHAIN"                 : { MAX : "C47", AVAIL : "D47" },
-    "STONE LEGION HERALDRY"         : { MAX : "C48", AVAIL : "D48" },
-    "SANGUINE VINTAGE"              : { MAX : "C49", AVAIL : "D49" },
-    "CABALIST'S HYMNAL"             : { MAX : "C50", AVAIL : "D50" },
-    "MANABOUND MIRROR"              : { MAX : "C51", AVAIL : "D51" },
-    "DREADFIRE VESSEL"              : { MAX : "C52", AVAIL : "D52" }
+    "SKULKER'S WING"                : { MAX : "C39", AVAIL : "D39" },
+    "BARGAST'S LEASH"               : { MAX : "C40", AVAIL : "D40" },
+    "GLUTTINOUS SPIKE"              : { MAX : "C41", AVAIL : "D41" },
+    "CONSUMPTIVE INFUSION"          : { MAX : "C42", AVAIL : "D42" },
+    "GLYPH OF ASSIMILATION"         : { MAX : "C43", AVAIL : "D43" },
+    "SPLINTERED HEART OF AL'AR"     : { MAX : "C44", AVAIL : "D44" },
+    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C45", AVAIL : "D45" },
+    "SOUL IGNITER"                  : { MAX : "C46", AVAIL : "D46" },
+    "MEMORY OF PAST SINS"           : { MAX : "C47", AVAIL : "D47" },
+    "MACABRE SHEET MUSIC"           : { MAX : "C48", AVAIL : "D48" },
+    "HATEFUL CHAIN"                 : { MAX : "C49", AVAIL : "D49" },
+    "STONE LEGION HERALDRY"         : { MAX : "C50", AVAIL : "D50" },
+    "SANGUINE VINTAGE"              : { MAX : "C51", AVAIL : "D51" },
+    "CABALIST'S HYMNAL"             : { MAX : "C52", AVAIL : "D52" },
+    "MANABOUND MIRROR"              : { MAX : "C53", AVAIL : "D53" },
+    "DREADFIRE VESSEL"              : { MAX : "C54", AVAIL : "D54" }
 };
 
 /** RAID MAINS & RAID ALTS SHEET */

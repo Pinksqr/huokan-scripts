@@ -34,6 +34,12 @@ class RaidMain extends RaidMember {
     }
 }
 
+/**
+ * Reservation represents a buyer placing a reservation for a raid run. Each reservation
+ * will have one service, and one or many funnels associated to it.
+ * @param {boosters} An array of Booster objects, where each booster has a booster name and a main name.
+ * Note the booster could be an alt name, or a main name!
+ */
 class Reservation {
     constructor(service, funnels, funnelType, funnelOption, buyerName, boosters) {
         this.service = service
@@ -42,6 +48,13 @@ class Reservation {
         this.funnelOption = funnelOption
         this.buyerName = buyerName
         this.boosters = boosters
+    }
+}
+
+class Booster {
+    constructor(boosterName, mainName){
+        this.boosterName = boosterName
+        this.mainName = mainName
     }
 }
 
