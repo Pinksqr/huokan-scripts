@@ -196,5 +196,8 @@ const COLUMNS_RESERVATIONS = {
     FUNNEL_OPTION   : 18,
     NOTE            : 19,
     CHECKBOX        : 20,
-    STATUS          : 21
+    STATUS          : 21,
+    RAID_SERVICE    : 28,
+    RAID_BUYER      : 29,
+    RAID_BOOSTER    : 30
 };

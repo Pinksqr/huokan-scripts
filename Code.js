@@ -14,6 +14,7 @@ function onEdit(event){
     updateReservationServiceInfoDropdowns(sheet, range)
 
     //Reservations
+    updateReservationMessages(sheet, range, value)
     handleReservations(sheet, range, value)
 }
 
@@ -377,6 +378,24 @@ function createReservationSheet(){
 }
 
 /**
+ * Resets error messages on the reservation sheet when a row is edited (to clear the error messages)
+ */
+function updateReservationMessages(sheet, range, value){
+    let sheetName = sheet.getName()
+
+    if(sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
+        let row = range.getRow()
+        let col = range.getColumn()
+
+        if(row > 7 && col > COLUMNS_RESERVATIONS.INDEX && col < COLUMNS_RESERVATIONS.NOTE){
+            if (sheet.getRange(row, COLUMNS_RESERVATIONS.CHECKBOX).getFontColor().toUpperCase() === MESSAGE_COLORS.FAILURE){
+                sendMessage(sheet, row, "", MESSAGE_WEIGHTS.DEFAULT, MESSAGE_COLORS.DEFAULT)
+            }
+        }
+    }
+}
+
+/**
  * Handles reserving a spot when the reservation check-box is checked (or unchecked)
  * @param sheet
  * @param range
@@ -413,16 +432,31 @@ function handleReservations(sheet, range, value){
             //Send a message with the status of the reservation before updating the other data
             sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
 
+
             //The response tells us if an update on the data needs to be done
             if (response.isUpdate){
-                updateReservationSheet(raidRoster, reservations, buyer, response)
+                updateReservationSheet(raidRoster, reservations, response)
+            } else {
+                range.uncheck() //Uncheck reserved checkbox
             }
         }
     }
 
     function handleReservation(raidRoster, reservations, buyer){
         Logger.log("Handling reservation...")
-        let reserved = false
+
+        //Check that all required columns are properly filled
+        switch (true){
+            case !buyer.buyerName:
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Buyer name required")
+            case !buyer.service:
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Service required")
+            case (buyer.funnels > 0 && !buyer.funnelType):
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Funnel type required when funnels are selected")
+            case (buyer.funnels > 0 && (buyer.funnelType === FUNNEL_TYPES.TRINKET || buyer.funnelType === FUNNEL_TYPES.WEAPON) && !buyer.funnelOpt):
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Funnel option required for trinket & weapon funnels")
+        }
+
         //Is there a carry spot?
         if (isSpotAvailable()){
             //Is it a carry, or a funnel?
@@ -486,30 +520,59 @@ function handleReservations(sheet, range, value){
     }
 
     function handleCancellation(raidRoster, reservations, buyer){
-        return false
+        for (let index in reservations){
+            let res = reservations[index]
+            if (res.buyerName === buyer.buyerName && res.service === buyer.service){
+                reservations.splice(index, 1)
+                return new ReservationResponse(true, MESSAGES.DEFAULT, "Reservation removed")
+            }
+        }
+        return new ReservationResponse(false, MESSAGES.ERROR, "Could not find reservation")
     }
 
-    function updateReservationSheet(raidRoster, reservations, buyer){
-        sheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).clearContent().setValue(JSON.stringify(raidRoster))
+    function updateReservationSheet(raidRoster, reservations){
+        //No need to update raid roster, because no changes should ever be made (unless we put a new feature in to edit them mid-week)
+
+        //Sort reservations by boss order so when they're displayed in the raid roster info, they're in the correct order
+        reservations.sort(function(a, b){
+            return BOSS_ORDER[a.service] - BOSS_ORDER[b.service]
+        })
         sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify(reservations))
 
         let maxValues = getMaxValues(sheet, raidRoster, reservations)
+        updateValues(CELLS_RESERVATIONS_CARRIES, maxValues.carries)
+        updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
+        updateValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
 
-        updateValues(CELLS_RESERVATIONS_CARRIES, maxValues.carries);
+        updateRaidRosterInfo()
 
         function updateValues(rangeArray, values){
             for (const index in values){
-                Logger.log("Setting " + rangeArray[index].AVAIL + " to " + values[index])
                 sheet.getRange(rangeArray[index].AVAIL).clearContent().setValue(values[index]);
             }
         }
-    }
 
-    function sendMessage(sheet, row, message, fontWeight, fontColor){
-        sheet.getRange(row, COLUMNS_RESERVATIONS.STATUS).clearContent().setValue(message)
-        sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.STATUS - COLUMNS_RESERVATIONS.SERVICE + 1))
-            .setFontWeight(fontWeight)
-            .setFontColor(fontColor)
+        function updateRaidRosterInfo(){
+            let row = 8 //First row in raid roster info
+            let serviceCol = COLUMNS_RESERVATIONS.RAID_SERVICE
+            let buyerCol = COLUMNS_RESERVATIONS.RAID_BUYER
+            let boosterCol = COLUMNS_RESERVATIONS.RAID_BOOSTER
+
+            sheet.getRange(row, serviceCol, sheet.getLastRow(), boosterCol - serviceCol +1).clearContent()
+
+            for (let index in reservations){
+                let reservation = reservations[index]
+                sheet.getRange(row, serviceCol).setValue(reservation.service)
+                sheet.getRange(row, buyerCol).setValue(reservation.buyerName)
+
+                for(let boosterIndex in reservation.boosters){
+                    let booster = reservation.boosters[index]
+                    sheet.getRange(row, boosterCol).setValue(booster)
+                    row++
+                }
+                row++
+            }
+        }
     }
 }
 
@@ -527,6 +590,14 @@ function arrayToTitleCase(strArray) {
         strArray[str] = toTitleCase(strArray[str])
     }
     return strArray
+}
+
+function sendMessage(sheet, row, message, fontWeight, fontColor){
+    sheet.getRange(row, COLUMNS_RESERVATIONS.STATUS).clearContent().setValue(message)
+    sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.STATUS - COLUMNS_RESERVATIONS.SERVICE + 1))
+        .setFontWeight(fontWeight)
+        .setFontColor(fontColor)
+    sheet.getRange(row, COLUMNS_RESERVATIONS.CHECKBOX).setFontColor("#808080") //Change checkbox to be closer to original
 }
 
 function getMaxValues(sheet, raidRoster, reservations){

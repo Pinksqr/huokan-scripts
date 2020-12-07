@@ -105,6 +105,19 @@ const TRINKETS = {
  * Obviously one day hope to bring it into a database to avoid this fiasco...
  */
 
+const BOSS_ORDER = {
+    "SHRIEKWING": 0,
+    "HUNTSMAN ALTIMOR": 1,
+    "SUN KING'S SALVATION": 2,
+    "ARTIFICER XY'MOX": 3,
+    "HUNGERING DESTROYER": 4,
+    "LADY INERVA DARKVEIN": 5,
+    "THE COUNCIL OF BLOOD": 6,
+    "SLUDGEFIST": 7,
+    "STONE LEGION GENERALS": 8,
+    "SIRE DENATHRIUS": 9,
+}
+
 const BOSS_TRINKETS = {
     "SHRIEKWING": [TRINKETS[0]],
     "HUNTSMAN ALTIMOR": [TRINKETS[1]],
