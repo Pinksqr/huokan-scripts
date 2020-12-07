@@ -240,6 +240,10 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             filter(cells.type, getFilteredTypes(values.service))
         } else if (values.service && values.type) {
             filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
+        } else if (!values.service && values.type && values.option) {
+            filter(cells.service, getFilteredServices(values.type, values.option))
+        } else if (!values.service && values.type && !values.option){
+            cells.option.clearContent().clearDataValidations()
         }
     }
 
@@ -254,19 +258,18 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     }
 
     function handleOption(cells, values){
-        Logger.log("Handling option...")
         if (!values.service && values.option){
-            Logger.log("Filtering service...")
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (values.service && !values.option){
-            filter(cells.service, getAllServices())
+            filter(cells.service, Object.values(SERVICES))
         }
     }
 
     function getFilteredServices(type, option){
         switch (type){
+            case FUNNEL_TYPES.ARMOR:
+                return Object.values(SERVICES)
             case FUNNEL_TYPES.WEAPON:
-                Logger.log("Looking for bosses with " + option)
                 for (let boss in BOSSES){
                     for (let weapon in BOSS_WEAPONS[BOSSES[boss]]){
                         if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
@@ -277,11 +280,9 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
                 }
                 break;
             case FUNNEL_TYPES.TRINKET:
-                Logger.log("Looking for bosses with " + option)
                 for (let boss in BOSSES){
                     for (let trinket in BOSS_TRINKETS[BOSSES[boss]]){
                         if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
-                            Logger.log("Found "  + BOSSES[boss])
                             return [BOSSES[boss]] //Break immediately since a trinket can only drop from one boss
                         }
                     }
@@ -291,6 +292,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     }
 
     function getFilteredTypes(service){
+        //If service is full clear, you cannot book a trinket or weapon funnel
+        if(service === SERVICES.FULL_CLEAR){
+            return [FUNNEL_TYPES.ARMOR]
+        }
+        //Otherwise, filter the service type by the boss (since some bosses dont drop weapon tokens, etc)
         for (let boss in BOSSES){
             if (service === BOSSES[boss]){
                 return BOSS_WEAPONS[BOSSES[boss]].length > 0 ?
@@ -302,6 +308,8 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
 
     function getFilteredOptions(type){
         switch (type){
+            case FUNNEL_TYPES.ARMOR:
+                return Object.values(ARMOR_TYPES)
             case FUNNEL_TYPES.WEAPON:
                 return Object.values(TOKENS)
             case FUNNEL_TYPES.TRINKET:
@@ -310,6 +318,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     }
 
     function getFilteredOptionsWithService(service, type){
+        //If full clear is picked with armor funnel, then display the armor types
+        if (service === SERVICES.FULL_CLEAR && type === FUNNEL_TYPES.ARMOR){
+            return Object.values(ARMOR_TYPES)
+        }
+        //Otherwise filter the funnel options by whichever boss & type is picked
         for (let boss in BOSSES){
             if (service === BOSSES[boss]){
                 switch(type){
@@ -320,10 +333,6 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
                 }
             }
         }
-    }
-
-    function getAllServices(){
-        return Object.values(BOSSES)
     }
 
     function filter(cell, values){
@@ -432,7 +441,6 @@ function handleReservations(sheet, range, value){
             //Send a message with the status of the reservation before updating the other data
             sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
 
-
             //The response tells us if an update on the data needs to be done
             if (response.isUpdate){
                 updateReservationSheet(raidRoster, reservations, response)
@@ -492,15 +500,12 @@ function handleReservations(sheet, range, value){
             }
 
             function reserveArmorFunnel(){
-
             }
 
             function reserveWeaponFunnel(){
-
             }
 
             function reserveTrinketFunnel(){
-
             }
         }
 
@@ -562,7 +567,7 @@ function handleReservations(sheet, range, value){
 
             for (let index in reservations){
                 let reservation = reservations[index]
-                sheet.getRange(row, serviceCol).setValue(reservation.service)
+                sheet.getRange(row, serviceCol).setValue(toTitleCase(reservation.service))
                 sheet.getRange(row, buyerCol).setValue(reservation.buyerName)
 
                 for(let boosterIndex in reservation.boosters){

@@ -49,6 +49,7 @@ const SPECIALIZATIONS = {
     12 : ["HAVOC", "VENGEANCE"]
 };
 
+//TODO: Change left-side to variables to make it cleaner :) (eg, MYSTIC: "MYSTIC")
 const TOKENS = {
     1 : "ABOMINABLE",
     2 : "MYSTIC",
@@ -75,11 +76,32 @@ const FUNNEL_TYPES = {
     TRINKET : "TRINKET FUNNEL"
 }
 
+const SERVICES = {
+    SHRIEKWING: "SHRIEKWING",
+    HUNTSMAN_ALTIMOR: "HUNTSMAN ALTIMOR",
+    SUN_KINGS_SALVATION: "SUN KING'S SALVATION",
+    ARTIFICER_XYMOX: "ARTIFICER XY'MOX",
+    HUNGERING_DESTROYER: "HUNGERING DESTROYER",
+    LADY_INERVA_DARKVEIN: "LADY INERVA DARKVEIN",
+    THE_COUNCIL_OF_BLOOD: "THE COUNCIL OF BLOOD",
+    SLUDGEFIST: "SLUDGEFIST",
+    STONE_LEGION_GENERALS: "STONE LEGION GENERALS",
+    SIRE_DENATHRIUS: "SIRE DENATHRIUS",
+    FULL_CLEAR: "FULL CLEAR"
+}
+
 const STATS = {
     STR : "STRENGTH",
     AGI : "AGILITY",
     INT : "INTELLECT"
 };
+
+const ARMOR_TYPES = {
+    PLATE : "PLATE",
+    MAIL : "MAIL",
+    LEATHER : "LEATHER",
+    CLOTH : "CLOTH"
+}
 
 const TRINKETS = {
     0 : "SKULKER'S WING",
@@ -144,23 +166,21 @@ const BOSS_WEAPONS = {
     "SIRE DENATHRIUS": [TOKENS[1], TOKENS[2], TOKENS[3], TOKENS[4]],
 }
 
-//TODO: Change left side to numbers, then use CLASS_ARMORTYPES[CLASSES[this.playerClass.toUpperCase()]]
 const CLASS_ARMORTYPES = {
-    "WARRIOR"       : "PLATE",
-    "PALADIN"       : "PLATE",
-    "HUNTER"        : "MAIL",
-    "ROGUE"         : "LEATHER",
-    "PRIEST"        : "CLOTH",
-    "DEATH KNIGHT"  : "PLATE",
-    "SHAMAN"        : "MAIL",
-    "MAGE"          : "CLOTH",
-    "WARLOCK"       : "CLOTH",
-    "MONK"          : "LEATHER",
-    "DRUID"         : "LEATHER",
-    "DEMON HUNTER"  : "LEATHER"
+    "WARRIOR"       : ARMOR_TYPES.PLATE,
+    "PALADIN"       : ARMOR_TYPES.PLATE,
+    "HUNTER"        : ARMOR_TYPES.MAIL,
+    "ROGUE"         : ARMOR_TYPES.LEATHER,
+    "PRIEST"        : ARMOR_TYPES.CLOTH,
+    "DEATH KNIGHT"  : ARMOR_TYPES.PLATE,
+    "SHAMAN"        : ARMOR_TYPES.MAIL,
+    "MAGE"          : ARMOR_TYPES.CLOTH,
+    "WARLOCK"       : ARMOR_TYPES.CLOTH,
+    "MONK"          : ARMOR_TYPES.LEATHER,
+    "DRUID"         : ARMOR_TYPES.LEATHER,
+    "DEMON HUNTER"  : ARMOR_TYPES.LEATHER
 };
 
-//TODO: Change left side to numbers, then use CLASS_TOKENS[CLASSES[this.playerClass]]
 const CLASS_TOKENS = {
     "WARRIOR"       : "ZENITH",
     "PALADIN"       : "VENERATED",
