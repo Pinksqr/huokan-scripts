@@ -36,10 +36,16 @@ const CELLS_RAIDINFO_CLASSES = {
 };
 
 const CELLS_RAIDINFO_ARMORTYPES = {
-    "PLATE"     : "L8",
-    "MAIL"      : "L9",
-    "LEATHER"   : "L10",
-    "CLOTH"     : "L11"
+    "SHRIEKWING"            : { CLOTH : "L8", LEATHER : "M8" , MAIL : "N8", PLATE: "O8"},
+    "HUNTSMAN ALTIMOR"      : { CLOTH : "L9", LEATHER : "M9" , MAIL : "N9", PLATE: "O9"},
+    "SUN KING'S SALVATION"  : { CLOTH : "L10", LEATHER : "M10" , MAIL : "N10", PLATE: "O10"},
+    "ARTIFICER XY'MOX"      : { CLOTH : "L11", LEATHER : "M11" , MAIL : "N11", PLATE: "O11"},
+    "HUNGERING DESTROYER"   : { CLOTH : "L12", LEATHER : "M12" , MAIL : "N12", PLATE: "O12"},
+    "LADY INERVA DARKVEIN"  : { CLOTH : "L13", LEATHER : "M13" , MAIL : "N13", PLATE: "O13"},
+    "THE COUNCIL OF BLOOD"  : { CLOTH : "L14", LEATHER : "M14" , MAIL : "N14", PLATE: "O14"},
+    "SLUDGEFIST"            : { CLOTH : "L15", LEATHER : "M15" , MAIL : "N15", PLATE: "O15"},
+    "STONE LEGION GENERALS" : { CLOTH : "L16", LEATHER : "M16" , MAIL : "N16", PLATE: "O16"},
+    "SIRE DENATHRIUS"       : { CLOTH : "L17", LEATHER : "M17" , MAIL : "N17", PLATE: "O17"},
 };
 
 const CELLS_RAIDINFO_MAINSTATS = {
@@ -49,29 +55,30 @@ const CELLS_RAIDINFO_MAINSTATS = {
 };
 
 const CELLS_RAIDINFO_WEAPONS = {
-    "ABOMINABLE"    : "R8",
-    "MYSTIC"        : "R9",
-    "VENERATED"     : "R10",
-    "ZENITH"        : "R11"
+    "HUNTSMAN ALTIMOR"      : { ABOMINABLE : "R8", MYSTIC : "S8" , VENERATED : "T8", ZENITH: "U8"},
+    "SUN KING'S SALVATION"  : { ABOMINABLE : "R9", MYSTIC : "S9" , VENERATED : "T9", ZENITH: "U9"},
+    "HUNGERING DESTROYER"   : { ABOMINABLE : "R10", MYSTIC : "S10" , VENERATED : "T10", ZENITH: "U10"},
+    "THE COUNCIL OF BLOOD"  : { ABOMINABLE : "R11", MYSTIC : "S11" , VENERATED : "T11", ZENITH: "U11"},
+    "SIRE DENATHRIUS"       : { ABOMINABLE : "R12", MYSTIC : "S12" , VENERATED : "T12", ZENITH: "U12"},
 };
 
 const CELLS_RAIDINFO_TRINKETS = {
-    "SKULKER'S WING"                : "U8",
-    "BARGAST'S LEASH"               : "U9",
-    "GLUTTINOUS SPIKE"              : "U10",
-    "CONSUMPTIVE INFUSION"          : "U11",
-    "GLYPH OF ASSIMILATION"         : "U12",
-    "SPLINTERED HEART OF AL'AR"     : "U13",
-    "TUFT OF SMOULDERING PLUMAGE"   : "U14",
-    "SOUL IGNITER"                  : "U15",
-    "MEMORY OF PAST SINS"           : "U16",
-    "MACABRE SHEET MUSIC"           : "U17",
-    "HATEFUL CHAIN"                 : "U18",
-    "STONE LEGION HERALDRY"         : "U19",
-    "SANGUINE VINTAGE"              : "U20",
-    "CABALIST'S HYMNAL"             : "U21",
-    "MANABOUND MIRROR"              : "U22",
-    "DREADFIRE VESSEL"              : "U23"
+    "SKULKER'S WING"                : "X8",
+    "BARGAST'S LEASH"               : "X9",
+    "GLUTTINOUS SPIKE"              : "X10",
+    "CONSUMPTIVE INFUSION"          : "X11",
+    "GLYPH OF ASSIMILATION"         : "X12",
+    "SPLINTERED HEART OF AL'AR"     : "X13",
+    "TUFT OF SMOULDERING PLUMAGE"   : "X14",
+    "SOUL IGNITER"                  : "X15",
+    "MEMORY OF PAST SINS"           : "X16",
+    "MACABRE SHEET MUSIC"           : "X17",
+    "HATEFUL CHAIN"                 : "X18",
+    "STONE LEGION HERALDRY"         : "X19",
+    "SANGUINE VINTAGE"              : "X20",
+    "CABALIST'S HYMNAL"             : "X21",
+    "MANABOUND MIRROR"              : "X22",
+    "DREADFIRE VESSEL"              : "X23"
 };
 
 /** RESERVATION TEMPLATE SHEET */
@@ -114,42 +121,43 @@ const CELLS_RESERVATIONS_SERVICES = {
 }
 
 const CELLS_RESERVATIONS_ARMORTYPES = {
-    "PLATE"     : { MAX : "C22", AVAIL : "D22" },
-    "MAIL"      : { MAX : "C23", AVAIL : "D23" },
-    "LEATHER"   : { MAX : "C24", AVAIL : "D24" },
-    "CLOTH"     : { MAX : "C25", AVAIL : "D25" }
+    "SHRIEKWING"            : { CLOTH : "C22", LEATHER : "D22" , MAIL : "E22", PLATE: "F22"},
+    "HUNTSMAN ALTIMOR"      : { CLOTH : "C23", LEATHER : "D23" , MAIL : "E23", PLATE: "F23"},
+    "SUN KING'S SALVATION"  : { CLOTH : "C24", LEATHER : "D24" , MAIL : "E24", PLATE: "F24"},
+    "ARTIFICER XY'MOX"      : { CLOTH : "C25", LEATHER : "D25" , MAIL : "E25", PLATE: "F25"},
+    "HUNGERING DESTROYER"   : { CLOTH : "C26", LEATHER : "D26" , MAIL : "E26", PLATE: "F26"},
+    "LADY INERVA DARKVEIN"  : { CLOTH : "C27", LEATHER : "D27" , MAIL : "E27", PLATE: "F27"},
+    "THE COUNCIL OF BLOOD"  : { CLOTH : "C28", LEATHER : "D28" , MAIL : "E28", PLATE: "F28"},
+    "SLUDGEFIST"            : { CLOTH : "C29", LEATHER : "D29" , MAIL : "E29", PLATE: "F29"},
+    "STONE LEGION GENERALS" : { CLOTH : "C30", LEATHER : "D30" , MAIL : "E30", PLATE: "F30"},
+    "SIRE DENATHRIUS"       : { CLOTH : "C31", LEATHER : "D31" , MAIL : "E31", PLATE: "F31"},
 };
 
-const CELLS_RESERVATIONS_MAINSTATS = {
-    "STRENGTH"  : { MAX : "C28", AVAIL : "D28" },
-    "AGILITY"   : { MAX : "C29", AVAIL : "D29" },
-    "INTELLECT" : { MAX : "C30", AVAIL : "D30" },
-}
-
 const CELLS_RESERVATIONS_WEAPONS = {
-    "ABOMINABLE"    : { MAX : "C33", AVAIL : "D33" },
-    "MYSTIC"        : { MAX : "C34", AVAIL : "D34" },
-    "VENERATED"     : { MAX : "C35", AVAIL : "D35" },
-    "ZENITH"        : { MAX : "C36", AVAIL : "D36" }
+    "HUNTSMAN ALTIMOR"      : { ABOMINABLE : "C36", MYSTIC : "D36" , VENERATED : "E36", ZENITH: "F36"},
+    "SUN KING'S SALVATION"  : { ABOMINABLE : "C37", MYSTIC : "D37" , VENERATED : "E37", ZENITH: "F37"},
+    "HUNGERING DESTROYER"   : { ABOMINABLE : "C38", MYSTIC : "D38" , VENERATED : "E38", ZENITH: "F38"},
+    "THE COUNCIL OF BLOOD"  : { ABOMINABLE : "C39", MYSTIC : "D39" , VENERATED : "E39", ZENITH: "F39"},
+    "SIRE DENATHRIUS"       : { ABOMINABLE : "C40", MYSTIC : "D40" , VENERATED : "E40", ZENITH: "F40"},
 };
 
 const CELLS_RESERVATIONS_TRINKETS = {
-    "SKULKER'S WING"                : { MAX : "C39", AVAIL : "D39" },
-    "BARGAST'S LEASH"               : { MAX : "C40", AVAIL : "D40" },
-    "GLUTTINOUS SPIKE"              : { MAX : "C41", AVAIL : "D41" },
-    "CONSUMPTIVE INFUSION"          : { MAX : "C42", AVAIL : "D42" },
-    "GLYPH OF ASSIMILATION"         : { MAX : "C43", AVAIL : "D43" },
-    "SPLINTERED HEART OF AL'AR"     : { MAX : "C44", AVAIL : "D44" },
-    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C45", AVAIL : "D45" },
-    "SOUL IGNITER"                  : { MAX : "C46", AVAIL : "D46" },
-    "MEMORY OF PAST SINS"           : { MAX : "C47", AVAIL : "D47" },
-    "MACABRE SHEET MUSIC"           : { MAX : "C48", AVAIL : "D48" },
-    "HATEFUL CHAIN"                 : { MAX : "C49", AVAIL : "D49" },
-    "STONE LEGION HERALDRY"         : { MAX : "C50", AVAIL : "D50" },
-    "SANGUINE VINTAGE"              : { MAX : "C51", AVAIL : "D51" },
-    "CABALIST'S HYMNAL"             : { MAX : "C52", AVAIL : "D52" },
-    "MANABOUND MIRROR"              : { MAX : "C53", AVAIL : "D53" },
-    "DREADFIRE VESSEL"              : { MAX : "C54", AVAIL : "D54" }
+    "SKULKER'S WING"                : { MAX : "C43", AVAIL : "D43" },
+    "BARGAST'S LEASH"               : { MAX : "C44", AVAIL : "D44" },
+    "GLUTTINOUS SPIKE"              : { MAX : "C45", AVAIL : "D45" },
+    "CONSUMPTIVE INFUSION"          : { MAX : "C46", AVAIL : "D46" },
+    "GLYPH OF ASSIMILATION"         : { MAX : "C47", AVAIL : "D47" },
+    "SPLINTERED HEART OF AL'AR"     : { MAX : "C48", AVAIL : "D48" },
+    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C49", AVAIL : "D49" },
+    "SOUL IGNITER"                  : { MAX : "C50", AVAIL : "D50" },
+    "MEMORY OF PAST SINS"           : { MAX : "C51", AVAIL : "D51" },
+    "MACABRE SHEET MUSIC"           : { MAX : "C52", AVAIL : "D52" },
+    "HATEFUL CHAIN"                 : { MAX : "C53", AVAIL : "D53" },
+    "STONE LEGION HERALDRY"         : { MAX : "C54", AVAIL : "D54" },
+    "SANGUINE VINTAGE"              : { MAX : "C55", AVAIL : "D55" },
+    "CABALIST'S HYMNAL"             : { MAX : "C56", AVAIL : "D56" },
+    "MANABOUND MIRROR"              : { MAX : "C57", AVAIL : "D57" },
+    "DREADFIRE VESSEL"              : { MAX : "C58", AVAIL : "D58" }
 };
 
 /** RAID MAINS & RAID ALTS SHEET */
@@ -170,21 +178,21 @@ const COLUMNS_RAIDALTS = {
 };
 
 const COLUMNS_RESERVATIONS = {
-    INDEX           : 6,
-    ADVERTISER_NAME : 7,
-    BUYER_NAME      : 9,
-    BUYER_BTAG      : 10,
-    BUYER_DISCID    : 11,
-    CLASS           : 12,
-    SPEC            : 13,
-    SERVICE         : 15,
-    FUNNELS         : 16,
-    FUNNEL_TYPE     : 17,
-    FUNNEL_OPTION   : 18,
-    NOTE            : 19,
-    CHECKBOX        : 20,
-    STATUS          : 21,
-    RAID_SERVICE    : 28,
-    RAID_BUYER      : 29,
-    RAID_BOOSTER    : 30
+    INDEX           : 8,
+    ADVERTISER_NAME : 9,
+    BUYER_NAME      : 13,
+    BUYER_BTAG      : 14,
+    BUYER_DISCID    : 15,
+    CLASS           : 16,
+    SPEC            : 17,
+    SERVICE         : 19,
+    FUNNELS         : 20,
+    FUNNEL_TYPE     : 21,
+    FUNNEL_OPTION   : 22,
+    NOTE            : 23,
+    CHECKBOX        : 24,
+    STATUS          : 25,
+    RAID_SERVICE    : 33,
+    RAID_BUYER      : 34,
+    RAID_BOOSTER    : 35
 };
