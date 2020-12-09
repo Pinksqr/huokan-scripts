@@ -9,12 +9,10 @@
  */
 class RaidMember {
     constructor(playerName, playerClass, lootSpecs, available, buyerName, boosterName){
-        this.playerName = playerName;
-        this.playerClass = playerClass;
-        this.lootSpecs = lootSpecs;
-        this.available = available;
-        this.buyerName = buyerName;
-        this.boosterName = boosterName;
+        this.playerName = playerName
+        this.playerClass = playerClass
+        this.lootSpecs = lootSpecs
+        this.available = available
     }
 }
 
@@ -25,14 +23,45 @@ class RaidMember {
  */
 class RaidMain extends RaidMember {
     constructor(playerName, playerClass, lootSpecs, available) {
-        super(playerName, playerClass, lootSpecs, available);
-        this.alts = [];
+        super(playerName, playerClass, lootSpecs, available)
+        this.alts = []
     }
 
     addAlt(altName, altClass, lootSpecs, available) {
-        let alt = new RaidMember(altName, altClass, lootSpecs, available);
-        this.alts.push(alt);
-        return alt;
+        let alt = new RaidMember(altName, altClass, lootSpecs, available)
+        this.alts.push(alt)
+        return alt
     }
+}
 
+/**
+ * Reservation represents a buyer placing a reservation for a raid run. Each reservation
+ * will have one service, and one or many funnels associated to it.
+ * @param {boosters} An array of Booster objects, where each booster has a booster name and a main name.
+ * Note the booster could be an alt name, or a main name!
+ */
+class Reservation {
+    constructor(service, funnels, funnelType, funnelOption, buyerName, boosters) {
+        this.service = service
+        this.funnels = funnels
+        this.funnelType = funnelType
+        this.funnelOption = funnelOption
+        this.buyerName = buyerName
+        this.boosters = boosters
+    }
+}
+
+class Booster {
+    constructor(boosterName, mainName){
+        this.boosterName = boosterName
+        this.mainName = mainName
+    }
+}
+
+class ReservationResponse {
+    constructor(isUpdate, status, message) {
+        this.isUpdate = isUpdate
+        this.status = status
+        this.message = message
+    }
 }
