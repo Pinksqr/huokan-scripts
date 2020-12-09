@@ -91,6 +91,11 @@ const SERVICES = {
     FULL_CLEAR: "FULL CLEAR"
 }
 
+const BUNDLES = [
+    SERVICES.FULL_CLEAR,
+    SERVICES.LAST_WING
+]
+
 const STATS = {
     STR : "STRENGTH",
     AGI : "AGILITY",
