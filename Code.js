@@ -18,7 +18,8 @@ function onEdit(event){
     updateReservationServiceInfoDropdowns(sheet, range)
 
     //Reservations (creating, updating, deleting, and error messages)
-    updateReservationMessages(sheet, range, value)
+    clearReservationMessages(sheet, range, value)
+    checkReservationBuyerInfo(sheet, range, value)
     handleReservations(sheet, range, value)
 }
 
@@ -405,6 +406,81 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
 }
 
 /**
+ * In the reservation sheet, creates/updates/removes warning messages when the buyer class/spec doesnt match
+ * the funnel information
+ * @param sheet
+ * @param range
+ */
+function checkReservationBuyerInfo(sheet, range, value){
+    let sheetName = sheet.getName()
+    if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information"){
+        let row = range.getRow()
+        let col = range.getColumn()
+
+        if (row > 7 && (
+            col === COLUMNS_RESERVATIONS.SPEC ||
+            col === COLUMNS_RESERVATIONS.SERVICE ||
+            col === COLUMNS_RESERVATIONS.FUNNEL_TYPE ||
+            col === COLUMNS_RESERVATIONS.FUNNEL_OPTION)) {
+
+            let className = sheet.getRange(row, COLUMNS_RESERVATIONS.CLASS).getValue().toUpperCase()
+            let spec = sheet.getRange(row, COLUMNS_RESERVATIONS.SPEC).getValue().toUpperCase()
+            let service = sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE).getValue().toUpperCase()
+            let funnels = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS).getValue()
+            let funnelType = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_TYPE).getValue().toUpperCase()
+            let funnelOpt = sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION).getValue().toUpperCase()
+
+            if (className && spec && service && funnelType && funnelOpt && funnels && funnels > 0){
+                if (!isBuyerMatchingService(className, spec, service, funnelType, funnelOpt)){
+                    sendMessage(sheet, row, "Warning: Buyer can't loot this",
+                        MESSAGE_WEIGHTS.WARNING, MESSAGE_COLORS.WARNING)
+                }
+            }
+        }
+    }
+
+    /** Checks if the buyer class/spec matches the funnel option they want to reserve (ex, trinket is useable, etc.) */
+    function isBuyerMatchingService(className, spec, service, funnelType, funnelOpt){
+        let isBuyerMatch = false
+        switch(funnelType){
+            case FUNNEL_TYPES.ARMOR:
+                isBuyerMatch = (funnelOpt === CLASS_ARMORTYPES[className])
+                break
+            case FUNNEL_TYPES.WEAPON:
+                isBuyerMatch = (funnelOpt === CLASS_TOKENS[className])
+                break
+            case FUNNEL_TYPES.TRINKET:
+                isBuyerMatch = isBuyerTrinket(className, spec, funnelOpt)
+                break
+        }
+        return isBuyerMatch
+
+        /** Returns true if the buyer's class/spec matches the trinket they want to reserve (or false if it doesnt) */
+        function isBuyerTrinket(buyerClass, buyerSpec, trinket){
+            let isBuyerTrinket = false
+            let trinkets = []
+
+            Logger.log(SPECIALIZATIONS[CLASSES[buyerClass]])
+            for (let index in SPECIALIZATIONS[CLASSES[buyerClass]]){
+                if (buyerSpec === SPECIALIZATIONS[CLASSES[buyerClass]][index]){
+                    trinkets = SPEC_TRINKETS[CLASSES[buyerClass]][index]
+                    break
+                }
+            }
+
+            for (let trinketIndex in trinkets){
+                if (trinket === trinkets[trinketIndex]){
+                    isBuyerTrinket = true
+                    break
+                }
+            }
+
+            return isBuyerTrinket
+        }
+    }
+}
+
+/**
  * Creates a sheet to book reservations
  */
 function createReservationSheet(){
@@ -474,7 +550,7 @@ function forceUpdateReservationValues() {
 /**
  * Resets error messages on the reservation sheet when a row is edited (to clear the error messages)
  */
-function updateReservationMessages(sheet, range, value){
+function clearReservationMessages(sheet, range, value){
     let sheetName = sheet.getName()
 
     if(sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
@@ -482,7 +558,8 @@ function updateReservationMessages(sheet, range, value){
         let col = range.getColumn()
 
         if(row > 7 && col > COLUMNS_RESERVATIONS.INDEX && col < COLUMNS_RESERVATIONS.NOTE){
-            if (sheet.getRange(row, COLUMNS_RESERVATIONS.CHECKBOX).getFontColor().toUpperCase() === MESSAGE_COLORS.FAILURE){
+            let fontColor = sheet.getRange(row, COLUMNS_RESERVATIONS.CHECKBOX).getFontColor().toUpperCase()
+            if (fontColor === MESSAGE_COLORS.FAILURE || fontColor === MESSAGE_COLORS.WARNING){
                 sendMessage(sheet, row, "", MESSAGE_WEIGHTS.DEFAULT, MESSAGE_COLORS.DEFAULT)
             }
         }
@@ -581,6 +658,7 @@ function handleReservations(sheet, range, value){
             case (buyer.funnelType && buyer.funnelOpt && !buyer.funnels):
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels must be greater than 0")
         }
+
 
         //Is there a carry spot?
         if (isSpotAvailable()){
@@ -789,11 +867,11 @@ function arrayToTitleCase(strArray) {
 
 /**
  * Sends a message on the given row to the status column
- * @param sheet : The sheet to send the message to
- * @param row : The row to send the message to (the column is always the status column)
- * @param message : The message to send
- * @param fontWeight : The font weight (either normal or bold)
- * @param fontColor : The font color (constants are declared in the constants.js page)
+ * @param sheet sheet to send the message to
+ * @param row row to send the message to (the column is always the status column)
+ * @param message message to send
+ * @param fontWeight font weight (either normal or bold)
+ * @param fontColor font color (constants are declared in the constants.js page)
  */
 function sendMessage(sheet, row, message, fontWeight, fontColor){
     sheet.getRange(row, COLUMNS_RESERVATIONS.STATUS).clearContent().setValue(message)

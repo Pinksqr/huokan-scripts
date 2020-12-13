@@ -2,21 +2,24 @@ const MESSAGES = {
     DEFAULT: "DEFAULT",
     SUCCESS: "SUCCESS",
     FAILURE: "FAILURE",
-    ERROR: "ERROR"
+    ERROR: "ERROR",
+    WARNING: "WARNING"
 }
 
 const MESSAGE_COLORS = {
     DEFAULT: "#000000",
     SUCCESS: "#6AA84F",
     FAILURE: "#CC0000",
-    ERROR: "#46BDC6"
+    ERROR: "#46BDC6",
+    WARNING: "#FF6D01"
 }
 
 const MESSAGE_WEIGHTS = {
     DEFAULT: "normal",
     SUCCESS: "bold",
     FAILURE: "bold",
-    ERROR: "bold"
+    ERROR: "bold",
+    WARNING: "bold"
 }
 
 const CLASSES = {
