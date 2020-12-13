@@ -1,5 +1,9 @@
 let properties = PropertiesService.getScriptProperties()
 
+/**
+ * onEdit event triggered by creating / updating / deleting a cell
+ * @param event
+ */
 function onEdit(event){
     let sheet = event.source.getActiveSheet()
     let range = event.range
@@ -9,11 +13,11 @@ function onEdit(event){
     updateRaidRosterSpecCheckboxes(sheet, range, value)
     updateRaidRoster(sheet, range)
 
-    //Reservation sheet updates
+    //Reservation sheet updates (the interactive part of the sheets that handle filtering mostly)
     updateReservationSpecDropdown(sheet, range, value)
     updateReservationServiceInfoDropdowns(sheet, range)
 
-    //Reservations
+    //Reservations (creating, updating, deleting, and error messages)
     updateReservationMessages(sheet, range, value)
     handleReservations(sheet, range, value)
 }
@@ -53,8 +57,8 @@ function updateRaidRosterSpecCheckboxes(sheet, range, value){
 }
 
 /**
- * On edit of the raid mains & raid alts sheet, recreates the raid roster and updates the raid properties
- * (eg,
+ * When editing the raid mains & raid alts sheet, this method recreates the raid roster and updates the raid properties
+ * (so the overall roster stats stay correct)
  * @param sheet The edited sheet (raid mains & raid alts)
  * @param range The range that's been edited
  */
@@ -79,6 +83,11 @@ function updateRaidRoster(sheet, range){
         }
     }
 
+    /**
+     * Creates a raid roster ([]), which is a list of raid members (see the RaidMember class).
+     * Each raid member consists of their: name, class, loot specs, and alts (which will also contain name/class/specs/main name)
+     * @returns {[]} A raid roster, which is an array of RaidMembers.
+     */
     function createRaidRoster() {
         let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         let mainSheet = spreadsheet.getSheetByName("Raid Mains");
@@ -135,6 +144,10 @@ function updateRaidRoster(sheet, range){
         return raidRoster;
     }
 
+    /**
+     * Updates the cells that show the stats for the raid roster (on the raid information page), using the max values set in the maxValues() function.
+     * @param maxValues
+     */
     function updateProperties(maxValues){
         let raidInfoSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information")
 
@@ -231,6 +244,12 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Determines how other columns should be filtered when the "Service" column is edited
+     * Ex, If funnel type is trinket, and Denathrius is chosen, change the funnel option to only show trinkets for Denathrius
+     * @param cells
+     * @param values
+     */
     function handleService(cells, values) {
         if (values.service && !values.type /*implies !values.option*/ ){
             filter(cells.type, getFilteredTypes(values.service))
@@ -245,6 +264,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Determines how other columns should be filtered if the "Type" column is edited
+     * @param cells
+     * @param values
+     */
     function handleType(cells, values){
         if (!values.service && values.type){
             filter(cells.option, getFilteredOptions(values.type))
@@ -255,6 +279,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Determines how other columns should be filtered if the "Option" column is edited
+     * @param cells
+     * @param values
+     */
     function handleOption(cells, values){
         if (!values.service && values.option){
             filter(cells.service, getFilteredServices(values.type, values.option))
@@ -263,6 +292,12 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Returns a (filtered) list of what should be displayed in the "Service" column depending on the funnel type & option chosen
+     * @param type
+     * @param option
+     * @returns {(string)[]|*[]}
+     */
     function getFilteredServices(type, option){
         switch (type){
             case FUNNEL_TYPES.ARMOR:
@@ -288,6 +323,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Returns a (filtered) list of what should be displayed in the "Type" column depending on the service chosen
+     * @param service
+     * @returns {string[]|(string)[]|(string)[]}
+     */
     function getFilteredTypes(service){
         //If service is full clear, you cannot book a trinket or weapon funnel
         if (service === SERVICES.FULL_CLEAR){
@@ -303,6 +343,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Returns a (filtered) list of what should be displayed in the "Options" column depending on the funnel type chosen
+     * @param type
+     * @returns {(string)[]|(string)[]}
+     */
     function getFilteredOptions(type){
         switch (type){
             case FUNNEL_TYPES.ARMOR:
@@ -314,6 +359,13 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Returns a (filtered) list of what should be displayed in the "Options" column based on both the funnel type,
+     * and service type
+     * @param service
+     * @param type
+     * @returns {*|(string)[]}
+     */
     function getFilteredOptionsWithService(service, type){
         switch(service){
             case SERVICES.FULL_CLEAR:
@@ -338,6 +390,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         }
     }
 
+    /**
+     * Filters a given cell using the given values (only in a reservation spreadsheet)
+     * @param cell
+     * @param values
+     */
     function filter(cell, values){
         if (cell && values && values.length) {
             let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(values)).build()
@@ -379,6 +436,7 @@ function createReservationSheet(){
     copyGridCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
     copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
 
+    /** Used to copy over values from the information sheet, to the (new) reservation sheet */
     function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
         for (let cell in sourceCells) {
             let value = sourceSheet.getRange(sourceCells[cell]).getValue()
@@ -386,6 +444,8 @@ function createReservationSheet(){
         }
     }
 
+    /** Used to copy over values from the info sheet, to the (new) reservation sheet; Specifically the grid arrays
+     * (Armor Types & Weapon Token grids) */
     function copyGridCells(sourceSheet, sourceCells, destSheet, destCells) {
         for (let row in sourceCells) {
             for (let col in sourceCells[row]) {
@@ -393,6 +453,21 @@ function createReservationSheet(){
                 destSheet.getRange(destCells[row][col]).setValue(value)
             }
         }
+    }
+}
+
+/**
+ * Force updates the reservation sheet values (used for when something is changed, like max carries)
+ */
+function forceUpdateReservationValues() {
+    let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet()
+    let sheetName = sheet.getName()
+
+    if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information") {
+        let raidRoster = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).getValue())
+        let reservations = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).getValue())
+
+        updateReservationSheet(sheet, raidRoster, reservations)
     }
 }
 
@@ -449,24 +524,26 @@ function handleReservations(sheet, range, value){
                 response = handleCancellation(raidRoster, reservations, buyer)
             }
 
-            //If the reservation was successful, lock that row so it cant be tampered with
-            /*if (isReservation) {
-                lockRow(row)
-            } else if (isCancellation){
-                unlockRow(row)
-            }*/
-
             //Send a message with the status of the reservation before updating the other data
             sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
 
             //The response tells us if an update on the data needs to be done
             if (response.isUpdate){
-                updateReservationSheet(raidRoster, reservations, response)
+
+                //Sort reservations by boss order so when they're displayed in the raid roster info, they're in the correct order
+                reservations.sort(function(a, b){
+                    return SERVICE_ORDER[a.service] - SERVICE_ORDER[b.service]
+                })
+                sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify(reservations))
+
+                //Update the values in the reservation sheet
+                updateReservationSheet(sheet, raidRoster, reservations, response)
             } else {
                 range.uncheck() //Uncheck reserved checkbox
             }
         }
 
+        /** Deprecated due to how sheets work; Can't really take permissions away or no script will work on those ranges */
         function lockRow(row) {
             let user = Session.getEffectiveUser()
             let range = sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.NOTE - COLUMNS_RESERVATIONS.SERVICE + 1))
@@ -474,6 +551,7 @@ function handleReservations(sheet, range, value){
             protection.setDescription(sheet.getRange(row, COLUMNS_RESERVATIONS.INDEX).getValue()).removeEditor(user)
         }
 
+        /** Deprecated due to how sheets work; See lockRow() */
         function unlockRow(row) {
             let user = Session.getEffectiveUser()
             let protection = sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.NOTE - COLUMNS_RESERVATIONS.SERVICE + 1)).protect()
@@ -481,6 +559,13 @@ function handleReservations(sheet, range, value){
         }
     }
 
+    /**
+     * Begins the process of finding a reservation for a buyer by determining if they are looking for a carry or a funnel
+     * @param raidRoster
+     * @param reservations
+     * @param buyer
+     * @returns {ReservationResponse}
+     */
     function handleReservation(raidRoster, reservations, buyer){
 
         //Check that all required columns are properly filled
@@ -515,6 +600,11 @@ function handleReservations(sheet, range, value){
             return availableCarries > 0 ? true : false
         }
 
+        /**
+         * Attempts to reserve a funnel for the buyer by trying to match each funnel that they want (eg, 1, 2, 3, or 4)
+         * to a relevant buyer based on what they want a funnel for (eg, armor, trinket, or weapon token)
+         * @returns {ReservationResponse}
+         */
         function reserveFunnel(){
             Logger.log("Handling funnel reservation...")
             let boosters = []
@@ -524,6 +614,8 @@ function handleReservations(sheet, range, value){
                 for (let playerIndex in raidRoster){
                     let player = raidRoster[playerIndex]
 
+                    /* If the raider is not assigned to a previous funnel slot (1, 2, 3, or 4) and
+                     isn't currently reserved, then we can see if they match the buyer's criteria */
                     if (!isPlayerMatched(player, matches) && !isPlayerReserved(reservations, buyer.service, player)){
                         let booster
                         switch(buyer.funnelType){
@@ -547,6 +639,7 @@ function handleReservations(sheet, range, value){
                 }
             }
 
+            // If we have found enough boosters for the buyer (eg, buyer asks for 4 and we found 4), then create a new reservation
             if (buyer.funnels === boosters.length){
                 reservations.push(new Reservation(
                     buyer.service,
@@ -560,6 +653,12 @@ function handleReservations(sheet, range, value){
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Not enough boosters found")
             }
 
+            /**
+             * Checks if the player is currently matched (eg, a buyer wants four funnels, and we're looking for a 4th, is this person part of the first 3?)
+             * @param player
+             * @param matches
+             * @returns {boolean}
+             */
             function isPlayerMatched(player, matches){
                 for (let matchIndex in matches){
                     if (player.playerName === matches[matchIndex]){
@@ -570,7 +669,10 @@ function handleReservations(sheet, range, value){
             }
         }
 
-        /** Creates a carry reservation */
+        /**
+         * Attempts to create a carry reservation (much easier than the funnel, mostly
+         * @returns {ReservationResponse}
+         */
         function reserveCarry(){
             Logger.log("Handling carry reservation...")
             let reservation = new Reservation(buyer.service, 0, null, null, buyer.buyerName, null);
@@ -579,6 +681,13 @@ function handleReservations(sheet, range, value){
         }
     }
 
+    /**
+     * Attempts to remove the buyer from the reservations list, freeing up the raider
+     * @param raidRoster TODO: Might not be needed?
+     * @param reservations
+     * @param buyer
+     * @returns {ReservationResponse}
+     */
     function handleCancellation(raidRoster, reservations, buyer){
         for (let index in reservations){
             let res = reservations[index]
@@ -589,69 +698,79 @@ function handleReservations(sheet, range, value){
         }
         return new ReservationResponse(false, MESSAGES.ERROR, "Could not find reservation")
     }
+}
 
-    function updateReservationSheet(raidRoster, reservations){
+/**
+ * Updates the reservation sheets retrieving the current max values for each category, and then updating the cells
+ * @param raidRoster
+ * @param reservations
+ */
+function updateReservationSheet(sheet, raidRoster, reservations){
 
-        //Sort reservations by boss order so when they're displayed in the raid roster info, they're in the correct order
-        reservations.sort(function(a, b){
-            return SERVICE_ORDER[a.service] - SERVICE_ORDER[b.service]
-        })
-        sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).clearContent().setValue(JSON.stringify(reservations))
+    //Get max values, and update the value cells on the left of the reservations sheet
+    let maxValues = getMaxValues(sheet, raidRoster, reservations)
+    updateValues(CELLS_RESERVATIONS_BOSSES, maxValues.carries)
+    updateGridValues(CELLS_RESERVATIONS_ARMORTYPES, maxValues.armorTypes)
+    updateGridValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
+    updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
 
-        //Get max values, and update the value cells on the left of the reservations sheet
-        let maxValues = getMaxValues(sheet, raidRoster, reservations)
-        updateValues(CELLS_RESERVATIONS_BOSSES, maxValues.carries)
-        updateGridValues(CELLS_RESERVATIONS_ARMORTYPES, maxValues.armorTypes)
-        updateGridValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
-        updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
+    //Update the service/buyer/funnelers area on the far right (used for raids to know who their funnelers are that week)
+    updateRaidRosterInfo()
 
-        //Update the service/buyer/funnelers area on the far right (used for raids to know who their funnelers are that week)
-        updateRaidRosterInfo()
-
-        //Updates values that use a grid (armor types & weapons tokens)
-        function updateGridValues(cellArray, values) {
-            for (const boss in cellArray) {
-                for (const funnelOpt in cellArray[boss]) {
-                    let cell = sheet.getRange(cellArray[boss][funnelOpt]).clearContent()
-                    values[boss][funnelOpt] ? cell.setValue(values[boss][funnelOpt]) : cell.setValue("0")
-                }
+    /**
+     * Updates values that use a grid (armor types & weapons tokens)
+     * @param cellArray
+     * @param values
+     */
+    function updateGridValues(cellArray, values) {
+        for (const boss in cellArray) {
+            for (const funnelOpt in cellArray[boss]) {
+                let cell = sheet.getRange(cellArray[boss][funnelOpt]).clearContent()
+                values[boss][funnelOpt] ? cell.setValue(values[boss][funnelOpt]) : cell.setValue("0")
             }
         }
+    }
 
-        //Updates values that dont use a grid (just one row of values)
-        function updateValues(cellArray, values) {
-            for (const index in cellArray) {
-                let cell = sheet.getRange(cellArray[index].AVAIL).clearContent()
-                values[index] ? cell.setValue(values[index]) : null
-            }
+    /**
+     * Updates values that dont use a grid (just one row of values)
+     * @param cellArray
+     * @param values
+     */
+    function updateValues(cellArray, values) {
+        for (const index in cellArray) {
+            let cell = sheet.getRange(cellArray[index].AVAIL).clearContent()
+            values[index] ? cell.setValue(values[index]) : null
         }
+    }
 
-        function updateRaidRosterInfo(){
-            let row = 8 //First row in raid roster info
-            let serviceCol = COLUMNS_RESERVATIONS.RAID_SERVICE
-            let buyerCol = COLUMNS_RESERVATIONS.RAID_BUYER
-            let boosterCol = COLUMNS_RESERVATIONS.RAID_BOOSTER
+    /**
+     * Update the area on the far right of the reservation sheets, displaying the buyers & their funnelers
+     * (used for raids to know who their funnelers are that week)
+     */
+    function updateRaidRosterInfo(){
+        let row = 8 //First row in raid roster info
+        let serviceCol = COLUMNS_RESERVATIONS.RAID_SERVICE
+        let buyerCol = COLUMNS_RESERVATIONS.RAID_BUYER
+        let boosterCol = COLUMNS_RESERVATIONS.RAID_BOOSTER
 
-            sheet.getRange(row, serviceCol, sheet.getLastRow(), boosterCol - serviceCol +1).clearContent()
+        sheet.getRange(row, serviceCol, sheet.getLastRow(), boosterCol - serviceCol +1).clearContent()
 
-            for (let index in reservations){
-                let reservation = reservations[index]
-                sheet.getRange(row, serviceCol).setValue(toTitleCase(reservation.service))
-                sheet.getRange(row, buyerCol).setValue(reservation.buyerName)
+        for (let index in reservations){
+            let reservation = reservations[index]
+            sheet.getRange(row, serviceCol).setValue(toTitleCase(reservation.service))
+            sheet.getRange(row, buyerCol).setValue(reservation.buyerName)
 
-                for(let boosterIndex in reservation.boosters){
-                    let booster = reservation.boosters[boosterIndex]
-                    sheet.getRange(row, boosterCol).setValue(booster.boosterName)
-                    row++
-                }
-                if(!reservation.boosters) {
-                    row++
-                }
+            for(let boosterIndex in reservation.boosters){
+                let booster = reservation.boosters[boosterIndex]
+                sheet.getRange(row, boosterCol).setValue(booster.boosterName)
+                row++
+            }
+            if(!reservation.boosters) {
+                row++
             }
         }
     }
 }
-
 
 /** -- Helper functions -- **/
 
@@ -668,6 +787,14 @@ function arrayToTitleCase(strArray) {
     return strArray
 }
 
+/**
+ * Sends a message on the given row to the status column
+ * @param sheet : The sheet to send the message to
+ * @param row : The row to send the message to (the column is always the status column)
+ * @param message : The message to send
+ * @param fontWeight : The font weight (either normal or bold)
+ * @param fontColor : The font color (constants are declared in the constants.js page)
+ */
 function sendMessage(sheet, row, message, fontWeight, fontColor){
     sheet.getRange(row, COLUMNS_RESERVATIONS.STATUS).clearContent().setValue(message)
     sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE, 1, (COLUMNS_RESERVATIONS.STATUS - COLUMNS_RESERVATIONS.SERVICE + 1))
@@ -679,6 +806,17 @@ function sendMessage(sheet, row, message, fontWeight, fontColor){
     }
 }
 
+/**
+ * A giant function to determine what the current maximum values, using the raid roster, and the reservations,
+ * across all bosses, for each category:
+ *  - Maximum of each armor type
+ *  - Maximum of each trinket
+ *  - Maximum of each weapon token
+ * @param sheet
+ * @param raidRoster
+ * @param reservations
+ * @returns {{carries: {}, mainStats: {}, trinkets: {}, classNames: {}, armorTypes: {}, weaponTokens: {}}}
+ */
 function getMaxValues(sheet, raidRoster, reservations){
     let sheetName = sheet.getName();
 
