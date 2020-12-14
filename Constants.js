@@ -2,21 +2,24 @@ const MESSAGES = {
     DEFAULT: "DEFAULT",
     SUCCESS: "SUCCESS",
     FAILURE: "FAILURE",
-    ERROR: "ERROR"
+    ERROR: "ERROR",
+    WARNING: "WARNING"
 }
 
 const MESSAGE_COLORS = {
     DEFAULT: "#000000",
     SUCCESS: "#6AA84F",
     FAILURE: "#CC0000",
-    ERROR: "#46BDC6"
+    ERROR: "#46BDC6",
+    WARNING: "#FF6D01"
 }
 
 const MESSAGE_WEIGHTS = {
     DEFAULT: "normal",
     SUCCESS: "bold",
     FAILURE: "bold",
-    ERROR: "bold"
+    ERROR: "bold",
+    WARNING: "bold"
 }
 
 const CLASSES = {
@@ -88,13 +91,31 @@ const SERVICES = {
     STONE_LEGION_GENERALS: "STONE LEGION GENERALS",
     SIRE_DENATHRIUS: "SIRE DENATHRIUS",
     LAST_WING: "LAST WING",
+    LAST_TWO: "LAST TWO",
     FULL_CLEAR: "FULL CLEAR"
 }
 
 const BUNDLES = [
     SERVICES.FULL_CLEAR,
-    SERVICES.LAST_WING
+    SERVICES.LAST_WING,
+    SERVICES.LAST_TWO
 ]
+
+const SERVICES_AVAIL = {
+    SHRIEKWING: false,
+    HUNTSMAN_ALTIMOR: false,
+    SUN_KINGS_SALVATION: false,
+    ARTIFICER_XYMOX: false,
+    HUNGERING_DESTROYER: false,
+    LADY_INERVA_DARKVEIN: false,
+    THE_COUNCIL_OF_BLOOD: false,
+    SLUDGEFIST: false,
+    STONE_LEGION_GENERALS: false,
+    SIRE_DENATHRIUS: false,
+    LAST_WING: false,
+    LAST_TWO: true,
+    FULL_CLEAR: true
+}
 
 const STATS = {
     STR : "STRENGTH",
