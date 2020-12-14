@@ -601,10 +601,7 @@ function handleReservations(sheet, range, value){
                 response = handleCancellation(raidRoster, reservations, buyer)
             }
 
-            //Send a message with the status of the reservation before updating the other data
-            sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
-
-            //The response tells us if an update on the data needs to be done
+            //If the response is to update the data, do so
             if (response.isUpdate){
 
                 //Sort reservations by boss order so when they're displayed in the raid roster info, they're in the correct order
@@ -615,8 +612,14 @@ function handleReservations(sheet, range, value){
 
                 //Update the values in the reservation sheet
                 updateReservationSheet(sheet, raidRoster, reservations, response)
-            } else {
-                range.uncheck() //Uncheck reserved checkbox
+            }
+
+            //After updating data, send a message with the status of the reservation
+            sendMessage(sheet, row, response.message, MESSAGE_WEIGHTS[response.status], MESSAGE_COLORS[response.status])
+
+            //After sending the message, if there is no update then uncheck the checkbox
+            if (!response.isUpdate){
+                range.uncheck()
             }
         }
 
@@ -817,7 +820,7 @@ function updateReservationSheet(sheet, raidRoster, reservations){
     function updateValues(cellArray, values) {
         for (const index in cellArray) {
             let cell = sheet.getRange(cellArray[index].AVAIL).clearContent()
-            values[index] ? cell.setValue(values[index]) : null
+            values[index] ? cell.setValue(values[index]) : cell.setValue("0")
         }
     }
 
@@ -1057,6 +1060,11 @@ function isPlayerReserved(reservations, boss, player){
                         isBooster = isPlayerBooster(player, reservation.boosters)
                     }
                     break;
+                case SERVICES.LAST_TWO:
+                    if (reservation.service === SERVICES.STONE_LEGION_GENERALS || reservation.service === SERVICES.SIRE_DENATHRIUS){
+                        isBooster = isPlayerBooster(player, reservation.boosters)
+                    }
+                    break
             }
         } else {
             //Check if the reservation matches the boss, or is a full clear or other bundle
@@ -1069,6 +1077,11 @@ function isPlayerReserved(reservations, boss, player){
                         isBooster = isPlayerBooster(player, reservation.boosters)
                     }
                     break;
+                case SERVICES.LAST_TWO:
+                    if (boss === SERVICES.STONE_LEGION_GENERALS || boss === SERVICES.SIRE_DENATHRIUS){
+                        isBooster = isPlayerBooster(player, reservation.boosters)
+                    }
+                    break
                 case boss:
                     isBooster = isPlayerBooster(player, reservation.boosters)
                     break;
@@ -1187,4 +1200,17 @@ function getTrinketLootable(trinket, player){
         }
         return trinkets;
     }
+}
+
+/**
+ * Gets services that are available for this sheet (ex, heroic only has full clear, last wing, and last two
+ */
+function getAddedServices() {
+    let services = []
+    for (let index in SERVICES_AVAIL){
+       if (SERVICES_AVAIL[index]){
+           services.push(SERVICES[index])
+       }
+    }
+    return services
 }
