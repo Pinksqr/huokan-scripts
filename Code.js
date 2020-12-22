@@ -261,7 +261,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (!values.service && values.type && !values.option){
             filter(cells.type, Object.values(FUNNEL_TYPES))
-            cells.option.clearContent().clearDataValidations()
+            filter(cells.option, getFilteredOptions(values.type))
         }
     }
 
@@ -286,9 +286,10 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleOption(cells, values){
+        Logger.log("Handling option...")
         if (!values.service && values.option){
             filter(cells.service, getFilteredServices(values.type, values.option))
-        } else if (values.service && !values.option){
+        } else if (!values.option){
             filter(cells.service, Object.values(SERVICES))
         }
     }
@@ -397,6 +398,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function filter(cell, values){
+        Logger.log(values)
         if (cell && values && values.length) {
             let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(values)).build()
             cell.setDataValidation(dataRule)
@@ -873,7 +875,7 @@ function updateReservationSheet(sheet, raidRoster, reservations){
 /** -- Helper functions -- **/
 
 function toTitleCase(str){
-    return str.length > 0 ? str.toLowerCase().split(" ").map(function (val) {
+    return (str && str.length > 0) ? str.toLowerCase().split(" ").map(function (val) {
         return val.replace(val[0], val[0].toUpperCase())
     }).join(" ") : ""
 }
