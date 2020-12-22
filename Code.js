@@ -260,7 +260,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             filter(cells.option, getFilteredOptions(values.type))
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (!values.service && values.type && !values.option){
-            filter(cells.type, Object.values(FUNNEL_TYPES))
+            filter(cells.type, getAvailableFunnelTypes())
             cells.option.clearContent().clearDataValidations()
         }
     }
@@ -289,7 +289,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         if (!values.service && values.option){
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (values.service && !values.option){
-            filter(cells.service, Object.values(SERVICES))
+            filter(cells.service, Object.values(getAvailableServices()))
         }
     }
 
@@ -302,25 +302,25 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     function getFilteredServices(type, option){
         switch (type){
             case FUNNEL_TYPES.ARMOR:
-                return Object.values(SERVICES)
+                return Object.values(getAvailableServices())
             case FUNNEL_TYPES.WEAPON:
                 for (let boss in BOSSES){
                     for (let weapon in BOSS_WEAPONS[BOSSES[boss]]){
                         if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
-                            return [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]
+                             return getAvailableServices().includes([BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]) ? [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]] : null
                         }
                     }
                 }
-                break;
+                break
             case FUNNEL_TYPES.TRINKET:
                 for (let boss in BOSSES){
                     for (let trinket in BOSS_TRINKETS[BOSSES[boss]]){
                         if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
-                            return [BOSSES[boss]] //Break immediately since a trinket can only drop from one boss
+                            return getAvailableServices().includes([BOSSES[boss]]) ? [BOSSES[boss]] : null //Break immediately since a trinket can only drop from one boss
                         }
                     }
                 }
-                break;
+                break
         }
     }
 
@@ -330,16 +330,37 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @returns {string[]|(string)[]|(string)[]}
      */
     function getFilteredTypes(service){
-        //If service is full clear, you cannot book a trinket or weapon funnel
-        if (service === SERVICES.FULL_CLEAR){
+        //If service is a bundle (ie, multiple bosses), you cannot book a trinket or weapon funnel
+        if (BUNDLES.includes(service)){
             return [FUNNEL_TYPES.ARMOR]
         }
         //Otherwise, filter the service type by the boss (since some bosses dont drop weapon tokens, etc)
         for (let boss in BOSSES){
             if (service === BOSSES[boss]){
-                return BOSS_WEAPONS[BOSSES[boss]].length > 0 ?
+                let types = []
+                for (let index in FUNNEL_TYPES_AVAIL){
+                    if (FUNNEL_TYPES_AVAIL[index]){
+
+                        switch (FUNNEL_TYPES[index]){
+                            case FUNNEL_TYPES.WEAPON:
+                                if (BOSS_WEAPONS[BOSSES[boss]].length > 0){
+                                    types.push(FUNNEL_TYPES.WEAPON)
+                                }
+                                break
+                            case FUNNEL_TYPES.TRINKET:
+                                types.push(FUNNEL_TYPES.TRINKET) //This only works because every boss drops a trinket
+                                break
+                            case FUNNEL_TYPES.ARMOR:
+                                types.push(FUNNEL_TYPES.ARMOR)
+                                break
+                        }
+                    }
+                }
+                //If they have a weapon, return the weapon type, otherwise just return armor and trinket
+                /*return BOSS_WEAPONS[BOSSES[boss]].length > 0 ?
                     [FUNNEL_TYPES.ARMOR, FUNNEL_TYPES.TRINKET, FUNNEL_TYPES.WEAPON] :
-                    [FUNNEL_TYPES.ARMOR, FUNNEL_TYPES.TRINKET]
+                    [FUNNEL_TYPES.ARMOR, FUNNEL_TYPES.TRINKET]*/
+                return types
             }
         }
     }
@@ -371,6 +392,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         switch(service){
             case SERVICES.FULL_CLEAR:
             case SERVICES.LAST_WING:
+            case SERVICES.LAST_TWO:
                 //Return everything
                 return Object.values(ARMOR_TYPES)
             default:
@@ -1205,12 +1227,20 @@ function getTrinketLootable(trinket, player){
 /**
  * Gets services that are available for this sheet (ex, heroic only has full clear, last wing, and last two
  */
-function getAddedServices() {
-    let services = []
-    for (let index in SERVICES_AVAIL){
-       if (SERVICES_AVAIL[index]){
-           services.push(SERVICES[index])
-       }
+function getAvailableServices() {
+    return getAvailable(SERVICES_AVAIL, SERVICES)
+}
+
+function getAvailableFunnelTypes() {
+    return getAvailable(FUNNEL_TYPES_AVAIL, FUNNEL_TYPES)
+}
+
+function getAvailable(fullList, filteredLIst) {
+    let list = []
+    for (let index in filteredLIst){
+        if (filteredLIst[index]){
+            list.push(fullList[index])
+        }
     }
-    return services
+    return list
 }

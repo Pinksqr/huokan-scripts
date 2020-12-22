@@ -79,6 +79,12 @@ const FUNNEL_TYPES = {
     TRINKET : "TRINKET FUNNEL"
 }
 
+const FUNNEL_TYPES_AVAIL = {
+    ARMOR : true,
+    WEAPON : false,
+    TRINKET : false
+}
+
 const SERVICES = {
     SHRIEKWING: "SHRIEKWING",
     HUNTSMAN_ALTIMOR: "HUNTSMAN ALTIMOR",
@@ -95,12 +101,6 @@ const SERVICES = {
     FULL_CLEAR: "FULL CLEAR"
 }
 
-const BUNDLES = [
-    SERVICES.FULL_CLEAR,
-    SERVICES.LAST_WING,
-    SERVICES.LAST_TWO
-]
-
 const SERVICES_AVAIL = {
     SHRIEKWING: false,
     HUNTSMAN_ALTIMOR: false,
@@ -116,6 +116,12 @@ const SERVICES_AVAIL = {
     LAST_TWO: true,
     FULL_CLEAR: true
 }
+
+const BUNDLES = [
+    SERVICES.FULL_CLEAR,
+    SERVICES.LAST_WING,
+    SERVICES.LAST_TWO
+]
 
 const STATS = {
     STR : "STRENGTH",
