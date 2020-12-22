@@ -485,16 +485,33 @@ function checkReservationBuyerInfo(sheet, range, value){
  */
 function createReservationSheet(){
     let spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    let sheets = spreadsheet.getSheets()
     let templateSheet = spreadsheet.getSheetByName("Reservation Template")
     let raidInfoSheet = spreadsheet.getSheetByName("Raid Information")
 
+    //For each spreadsheet, hide anything that isn't raid info, or roster
+    for (let index in sheets){
+        let sheetName = sheets[index].getSheetName()
+        Logger.log(index + " " + sheetName)
+        if (sheetName !== "Raid Information" && sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Reservation Template"){
+            if (index < 4){
+                sheets[index].activate()
+                spreadsheet.moveActiveSheet(5)
+                sheets[index].hideSheet()
+            } else if (index > 4){
+                sheets[index].hideSheet()
+            }
+        }
+    }
+
+    //Create new sheet and get the sheet name from the raid info details
     let newSheet = templateSheet.copyTo(spreadsheet)
     let newSheetName = raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.DATE).getDisplayValue()
 
     if (newSheetName && !spreadsheet.getSheetByName(newSheetName)) {
         newSheet.setName(newSheetName)
         newSheet.activate()
-        spreadsheet.moveActiveSheet(5)
+        spreadsheet.moveActiveSheet(1)
     }
 
     let raidRoster = properties.getProperty("raidRoster")
