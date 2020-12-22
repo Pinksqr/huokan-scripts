@@ -261,7 +261,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (!values.service && values.type && !values.option){
             filter(cells.type, getAvailableFunnelTypes())
-            cells.option.clearContent().clearDataValidations()
+            filter(cells.option, getFilteredOptions(values.type))
         }
     }
 
@@ -286,9 +286,10 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleOption(cells, values){
+        Logger.log("Handling option...")
         if (!values.service && values.option){
             filter(cells.service, getFilteredServices(values.type, values.option))
-        } else if (values.service && !values.option){
+        } else if (!values.option){
             filter(cells.service, Object.values(getAvailableServices()))
         }
     }
@@ -419,6 +420,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function filter(cell, values){
+        Logger.log(values)
         if (cell && values && values.length) {
             let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(values)).build()
             cell.setDataValidation(dataRule)
@@ -507,16 +509,33 @@ function checkReservationBuyerInfo(sheet, range, value){
  */
 function createReservationSheet(){
     let spreadsheet = SpreadsheetApp.getActiveSpreadsheet()
+    let sheets = spreadsheet.getSheets()
     let templateSheet = spreadsheet.getSheetByName("Reservation Template")
     let raidInfoSheet = spreadsheet.getSheetByName("Raid Information")
 
+    //For each spreadsheet, hide anything that isn't raid info, or roster
+    for (let index in sheets){
+        let sheetName = sheets[index].getSheetName()
+        Logger.log(index + " " + sheetName)
+        if (sheetName !== "Raid Information" && sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Reservation Template"){
+            if (index < 4){
+                sheets[index].activate()
+                spreadsheet.moveActiveSheet(5)
+                sheets[index].hideSheet()
+            } else if (index > 4){
+                sheets[index].hideSheet()
+            }
+        }
+    }
+
+    //Create new sheet and get the sheet name from the raid info details
     let newSheet = templateSheet.copyTo(spreadsheet)
     let newSheetName = raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.DATE).getDisplayValue()
 
     if (newSheetName && !spreadsheet.getSheetByName(newSheetName)) {
         newSheet.setName(newSheetName)
         newSheet.activate()
-        spreadsheet.moveActiveSheet(5)
+        spreadsheet.moveActiveSheet(1)
     }
 
     let raidRoster = properties.getProperty("raidRoster")
@@ -531,8 +550,8 @@ function createReservationSheet(){
     //Currently not copying class data; too much clutter
     copyCells(raidInfoSheet, CELLS_RAIDINFO_BOSSES, newSheet, CELLS_RESERVATIONS_BOSSES)
     copyGridCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES)
-    copyGridCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
+    //copyGridCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
+    //copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
 
     /** Used to copy over values from the information sheet, to the (new) reservation sheet */
     function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
@@ -1228,11 +1247,11 @@ function getTrinketLootable(trinket, player){
  * Gets services that are available for this sheet (ex, heroic only has full clear, last wing, and last two
  */
 function getAvailableServices() {
-    return getAvailable(SERVICES_AVAIL, SERVICES)
+    return getAvailable(SERVICES, SERVICES_AVAIL)
 }
 
 function getAvailableFunnelTypes() {
-    return getAvailable(FUNNEL_TYPES_AVAIL, FUNNEL_TYPES)
+    return getAvailable(FUNNEL_TYPES, FUNNEL_TYPES_AVAIL)
 }
 
 function getAvailable(fullList, filteredLIst) {
