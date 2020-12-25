@@ -306,18 +306,22 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
                 return Object.values(getAvailableServices())
             case FUNNEL_TYPES.WEAPON:
                 for (let boss in BOSSES){
-                    for (let weapon in BOSS_WEAPONS[BOSSES[boss]]){
-                        if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
-                             return getAvailableServices().includes([BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]) ? [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]] : null
+                    if (SERVICES_AVAIL[boss]) {
+                        for (let weapon in BOSS_WEAPONS[BOSSES[boss]]) {
+                            if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
+                                return getAvailableServices().includes([BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]) ? [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]] : null
+                            }
                         }
                     }
                 }
                 break
             case FUNNEL_TYPES.TRINKET:
                 for (let boss in BOSSES){
-                    for (let trinket in BOSS_TRINKETS[BOSSES[boss]]){
-                        if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
-                            return getAvailableServices().includes([BOSSES[boss]]) ? [BOSSES[boss]] : null //Break immediately since a trinket can only drop from one boss
+                    if (SERVICES_AVAIL[boss]) {
+                        for (let trinket in BOSS_TRINKETS[BOSSES[boss]]) {
+                            if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
+                                return getAvailableServices().includes([BOSSES[boss]]) ? [BOSSES[boss]] : null //Break immediately since a trinket can only drop from one boss
+                            }
                         }
                     }
                 }
@@ -516,7 +520,6 @@ function createReservationSheet(){
     //For each spreadsheet, hide anything that isn't raid info, or roster
     for (let index in sheets){
         let sheetName = sheets[index].getSheetName()
-        Logger.log(index + " " + sheetName)
         if (sheetName !== "Raid Information" && sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Reservation Template"){
             if (index < 4){
                 sheets[index].activate()
@@ -961,34 +964,37 @@ function getMaxValues(sheet, raidRoster, reservations){
         let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
             SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information") : sheet
 
-
         for (let bossIndex in BOSSES){
-            let maxCarry = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
-                carrySheet.getRange(CELLS_RAIDINFO_BOSSES[BOSSES[bossIndex]]).getValue() :
-                carrySheet.getRange(CELLS_RESERVATIONS_BOSSES[BOSSES[bossIndex]].MAX).getValue()
-            if (maxCarry > 0) {
-                for (let resIndex in reservations) {
-                    let reservation = reservations[resIndex]
-                    switch (reservation.service){
-                        case SERVICES.FULL_CLEAR:
-                            maxCarry--
-                            break;
-                        case SERVICES.LAST_WING:
-                            if (
-                                BOSSES[bossIndex] === SERVICES.SLUDGEFIST ||
-                                BOSSES[bossIndex] === SERVICES.STONE_LEGION_GENERALS ||
-                                BOSSES[bossIndex] === SERVICES.SIRE_DENATHRIUS
-                            ){  maxCarry-- }
-                            break;
-                        default:
-                            if (BOSSES[bossIndex] === reservations[resIndex].service) {
+            if (SERVICES_AVAIL[bossIndex]) {
+                let maxCarry = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
+                    carrySheet.getRange(CELLS_RAIDINFO_BOSSES[BOSSES[bossIndex]]).getValue() :
+                    carrySheet.getRange(CELLS_RESERVATIONS_BOSSES[BOSSES[bossIndex]].MAX).getValue()
+                if (maxCarry > 0) {
+                    for (let resIndex in reservations) {
+                        let reservation = reservations[resIndex]
+                        switch (reservation.service) {
+                            case SERVICES.FULL_CLEAR:
                                 maxCarry--
-                            }
-                            break;
+                                break;
+                            case SERVICES.LAST_WING:
+                                if (
+                                    BOSSES[bossIndex] === SERVICES.SLUDGEFIST ||
+                                    BOSSES[bossIndex] === SERVICES.STONE_LEGION_GENERALS ||
+                                    BOSSES[bossIndex] === SERVICES.SIRE_DENATHRIUS
+                                ) {
+                                    maxCarry--
+                                }
+                                break;
+                            default:
+                                if (BOSSES[bossIndex] === reservations[resIndex].service) {
+                                    maxCarry--
+                                }
+                                break;
+                        }
                     }
                 }
+                maxCarries[BOSSES[bossIndex]] = maxCarry
             }
-            maxCarries[BOSSES[bossIndex]] = maxCarry
         }
         Logger.log("---MAX CARRIES---")
         Logger.log(maxCarries)
