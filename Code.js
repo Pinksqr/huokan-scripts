@@ -276,6 +276,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         } else if (values.service && values.type){
             filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
         } else if (!values.type){
+            filter(cells.service, Object.values(SERVICES))
             cells.option.clearContent().clearDataValidations()
         }
     }
