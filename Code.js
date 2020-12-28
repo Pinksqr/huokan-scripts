@@ -273,9 +273,11 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     function handleType(cells, values){
         if (!values.service && values.type){
             filter(cells.option, getFilteredOptions(values.type))
+            filter(cells.service, getFilteredServices(values.type, null))
         } else if (values.service && values.type){
             filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
         } else if (!values.type){
+            filter(cells.service, Object.values(getAvailableServices()))
             cells.option.clearContent().clearDataValidations()
         }
     }
@@ -301,31 +303,37 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @returns {(string)[]|*[]}
      */
     function getFilteredServices(type, option){
-        switch (type){
-            case FUNNEL_TYPES.ARMOR:
-                return Object.values(getAvailableServices())
-            case FUNNEL_TYPES.WEAPON:
-                for (let boss in BOSSES){
-                    if (SERVICES_AVAIL[boss]) {
-                        for (let weapon in BOSS_WEAPONS[BOSSES[boss]]) {
-                            if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
-                                return getAvailableServices().includes([BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]) ? [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]] : null
+        if (option) {
+            switch (type) {
+                case FUNNEL_TYPES.ARMOR:
+                    return Object.values(getAvailableServices())
+                case FUNNEL_TYPES.WEAPON:
+                    for (let boss in BOSSES) {
+                        if (SERVICES_AVAIL[boss]) {
+                            for (let weapon in BOSS_WEAPONS[BOSSES[boss]]) {
+                                if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
+                                    return getAvailableServices().includes([BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]) ? [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]] : null
+                                }
                             }
                         }
                     }
-                }
-                break
-            case FUNNEL_TYPES.TRINKET:
-                for (let boss in BOSSES){
-                    if (SERVICES_AVAIL[boss]) {
-                        for (let trinket in BOSS_TRINKETS[BOSSES[boss]]) {
-                            if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
-                                return getAvailableServices().includes([BOSSES[boss]]) ? [BOSSES[boss]] : null //Break immediately since a trinket can only drop from one boss
+                    break
+                case FUNNEL_TYPES.TRINKET:
+                    for (let boss in BOSSES) {
+                        if (SERVICES_AVAIL[boss]) {
+                            for (let trinket in BOSS_TRINKETS[BOSSES[boss]]) {
+                                if (option === BOSS_TRINKETS[BOSSES[boss]][trinket]) {
+                                    return getAvailableServices().includes([BOSSES[boss]]) ? [BOSSES[boss]] : null //Break immediately since a trinket can only drop from one boss
+                                }
                             }
                         }
                     }
-                }
-                break
+                    break
+            }
+        } else {
+            if (type === FUNNEL_TYPES.ARMOR){
+                return [SERVICES.FULL_CLEAR]
+            }
         }
     }
 
@@ -336,8 +344,13 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      */
     function getFilteredTypes(service){
         //If service is a bundle (ie, multiple bosses), you cannot book a trinket or weapon funnel
-        if (BUNDLES.includes(service)){
-            return [FUNNEL_TYPES.ARMOR]
+        if (BUNDLES.includes(service)){ //Only full clears can book funnels
+            if (service === "FULL CLEAR") {
+                return [FUNNEL_TYPES.ARMOR]
+            } else {
+                Logger.log("Here")
+                return []
+            }
         }
         //Otherwise, filter the service type by the boss (since some bosses dont drop weapon tokens, etc)
         for (let boss in BOSSES){
@@ -427,6 +440,9 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         Logger.log(values)
         if (cell && values && values.length) {
             let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(arrayToTitleCase(values)).build()
+            cell.setDataValidation(dataRule)
+        } else if (cell){
+            let dataRule = SpreadsheetApp.newDataValidation().requireValueInList(values).build()
             cell.setDataValidation(dataRule)
         }
     }
