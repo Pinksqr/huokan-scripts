@@ -8,9 +8,19 @@ const CELLS_RAIDINFO_INFO = {
 };
 
 const CELLS_RAIDINFO_BOSSES = {
-    "FULL CLEAR" : "F8",
-    "LAST TWO": "F9",
-    "AOTC": "F10"
+    /*"SHRIEKWING"            : "F8",
+    "HUNTSMAN ALTIMOR"      : "F9",
+    "SUN KING'S SALVATION"  : "F10",
+    "ARTIFICER XY'MOX"      : "F11",
+    "HUNGERING DESTROYER"   : "F12",
+    "LADY INERVA DARKVEIN"  : "F13",
+    "THE COUNCIL OF BLOOD"  : "F14",
+    "SLUDGEFIST"            : "F15",
+    "STONE LEGION GENERALS" : "F16",
+    "SIRE DENATHRIUS"       : "F17",*/
+    "FULL CLEAR"            : "F8",
+    "LAST TWO"              : "F9",
+    "AOTC"                  : "F10"
 };
 
 const CELLS_RAIDINFO_CLASSES = {
@@ -29,7 +39,16 @@ const CELLS_RAIDINFO_CLASSES = {
 };
 
 const CELLS_RAIDINFO_ARMORTYPES = {
-    "FULL CLEAR": { CLOTH : "L8", LEATHER : "M8", MAIL : "N8", PLATE : "O8" }
+    "SHRIEKWING"            : { CLOTH : "L8", LEATHER : "M8" , MAIL : "N8", PLATE: "O8"},
+    "HUNTSMAN ALTIMOR"      : { CLOTH : "L9", LEATHER : "M9" , MAIL : "N9", PLATE: "O9"},
+    "SUN KING'S SALVATION"  : { CLOTH : "L10", LEATHER : "M10" , MAIL : "N10", PLATE: "O10"},
+    "ARTIFICER XY'MOX"      : { CLOTH : "L11", LEATHER : "M11" , MAIL : "N11", PLATE: "O11"},
+    "HUNGERING DESTROYER"   : { CLOTH : "L12", LEATHER : "M12" , MAIL : "N12", PLATE: "O12"},
+    "LADY INERVA DARKVEIN"  : { CLOTH : "L13", LEATHER : "M13" , MAIL : "N13", PLATE: "O13"},
+    "THE COUNCIL OF BLOOD"  : { CLOTH : "L14", LEATHER : "M14" , MAIL : "N14", PLATE: "O14"},
+    "SLUDGEFIST"            : { CLOTH : "L15", LEATHER : "M15" , MAIL : "N15", PLATE: "O15"},
+    "STONE LEGION GENERALS" : { CLOTH : "L16", LEATHER : "M16" , MAIL : "N16", PLATE: "O16"},
+    "SIRE DENATHRIUS"       : { CLOTH : "L17", LEATHER : "M17" , MAIL : "N17", PLATE: "O17"},
 };
 
 const CELLS_RAIDINFO_MAINSTATS = {
@@ -77,9 +96,19 @@ const CELLS_RESERVATIONS_INFO = {
 };
 
 const CELLS_RESERVATIONS_BOSSES = {
-    "FULL CLEAR": { MAX : "C8", AVAIL : "D8" },
-    "LAST TWO": { MAX : "C9", AVAIL : "D9" },
-    "AOTC": { MAX : "C10", AVAIL : "D10" },
+    /*"SHRIEKWING"            : { MAX : "C8", AVAIL : "D8" },
+    "HUNTSMAN ALTIMOR"      : { MAX : "C9", AVAIL : "D9" },
+    "SUN KING'S SALVATION"  : { MAX : "C10", AVAIL : "D10" },
+    "ARTIFICER XY'MOX"      : { MAX : "C11", AVAIL : "D11" },
+    "HUNGERING DESTROYER"   : { MAX : "C12", AVAIL : "D12" },
+    "LADY INERVA DARKVEIN"  : { MAX : "C13", AVAIL : "D13" },
+    "THE COUNCIL OF BLOOD"  : { MAX : "C14", AVAIL : "D14" },
+    "SLUDGEFIST"            : { MAX : "C15", AVAIL : "D15" },
+    "STONE LEGION GENERALS" : { MAX : "C16", AVAIL : "D16" },
+    "SIRE DENATHRIUS"       : { MAX : "C17", AVAIL : "D17" },*/
+    "FULL CLEAR": {MAX: "C8", AVAIL:"D8"},
+    "LAST TWO": {MAX:"C9", AVAIL:"D9"},
+    "AOTC": {MAX:"C10", AVAIL:"D10"}
 }
 
 const CELLS_RESERVATIONS_BUNDLES = {
@@ -89,22 +118,22 @@ const CELLS_RESERVATIONS_BUNDLES = {
 }
 
 const CELLS_RESERVATIONS_SERVICES = {
-    "SHRIEKWING"            : { MAX : "C8", AVAIL : "D8" },
-    "HUNTSMAN ALTIMOR"      : { MAX : "C9", AVAIL : "D9" },
-    "SUN KING'S SALVATION"  : { MAX : "C10", AVAIL : "D10" },
-    "ARTIFICER XY'MOX"      : { MAX : "C11", AVAIL : "D11" },
-    "HUNGERING DESTROYER"   : { MAX : "C12", AVAIL : "D12" },
-    "LADY INERVA DARKVEIN"  : { MAX : "C13", AVAIL : "D13" },
-    "THE COUNCIL OF BLOOD"  : { MAX : "C14", AVAIL : "D14" },
-    "SLUDGEFIST"            : { MAX : "C15", AVAIL : "D15" },
-    "STONE LEGION GENERALS" : { MAX : "C16", AVAIL : "D16" },
-    "SIRE DENATHRIUS"       : { MAX : "C17", AVAIL : "D17" },
-    "LAST WING"             : { MAX : "C18", AVAIL : "D18" },
-    "FULL CLEAR"            : { MAX : "C19", AVAIL : "D19" }
+    "FULL CLEAR"            : { MAX : "C8", AVAIL : "D8" },
+    "LAST TWO"              : { MAX : "C9", AVAIL : "D9" },
+    "AOTC"                  : { MAX : "C10", AVAIL : "D10" }
 }
 
 const CELLS_RESERVATIONS_ARMORTYPES = {
-    "FULL CLEAR": { CLOTH : "C13", LEATHER : "D13" , MAIL : "E13", PLATE: "F13"}
+    "SHRIEKWING"            : { CLOTH : "C14", LEATHER : "D14" , MAIL : "E14", PLATE: "F14"},
+    "HUNTSMAN ALTIMOR"      : { CLOTH : "C15", LEATHER : "D15" , MAIL : "E15", PLATE: "F15"},
+    "SUN KING'S SALVATION"  : { CLOTH : "C16", LEATHER : "D16" , MAIL : "E16", PLATE: "F16"},
+    "ARTIFICER XY'MOX"      : { CLOTH : "C17", LEATHER : "D17" , MAIL : "E17", PLATE: "F17"},
+    "HUNGERING DESTROYER"   : { CLOTH : "C18", LEATHER : "D18" , MAIL : "E18", PLATE: "F18"},
+    "LADY INERVA DARKVEIN"  : { CLOTH : "C19", LEATHER : "D19" , MAIL : "E19", PLATE: "F19"},
+    "THE COUNCIL OF BLOOD"  : { CLOTH : "C20", LEATHER : "D20" , MAIL : "E20", PLATE: "F20"},
+    "SLUDGEFIST"            : { CLOTH : "C21", LEATHER : "D21" , MAIL : "E21", PLATE: "F21"},
+    "STONE LEGION GENERALS" : { CLOTH : "C22", LEATHER : "D22" , MAIL : "E22", PLATE: "F22"},
+    "SIRE DENATHRIUS"       : { CLOTH : "C23", LEATHER : "D23" , MAIL : "E23", PLATE: "F23"},
 };
 
 const CELLS_RESERVATIONS_WEAPONS = {

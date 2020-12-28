@@ -98,7 +98,8 @@ const SERVICES = {
     SIRE_DENATHRIUS: "SIRE DENATHRIUS",
     LAST_WING: "LAST WING",
     LAST_TWO: "LAST TWO",
-    FULL_CLEAR: "FULL CLEAR"
+    FULL_CLEAR: "FULL CLEAR",
+    AOTC: "AOTC"
 }
 
 const SERVICES_AVAIL = {
@@ -114,13 +115,14 @@ const SERVICES_AVAIL = {
     SIRE_DENATHRIUS: false,
     LAST_WING: false,
     LAST_TWO: true,
-    FULL_CLEAR: true
+    FULL_CLEAR: true,
+    AOTC: true
 }
 
 const BUNDLES = [
     SERVICES.FULL_CLEAR,
-    SERVICES.LAST_WING,
-    SERVICES.LAST_TWO
+    SERVICES.LAST_TWO,
+    SERVICES.AOTC
 ]
 
 const STATS = {
@@ -173,6 +175,8 @@ const SERVICE_ORDER = {
     "SLUDGEFIST": 9,
     "STONE LEGION GENERALS": 10,
     "SIRE DENATHRIUS": 11,
+    "LAST TWO": 13,
+    "AOTC": 14
 }
 
 const BOSS_TRINKETS = {

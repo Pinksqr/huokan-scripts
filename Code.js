@@ -836,8 +836,8 @@ function updateReservationSheet(sheet, raidRoster, reservations){
     let maxValues = getMaxValues(sheet, raidRoster, reservations)
     updateValues(CELLS_RESERVATIONS_BOSSES, maxValues.carries)
     updateGridValues(CELLS_RESERVATIONS_ARMORTYPES, maxValues.armorTypes)
-    updateGridValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
-    updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
+    //updateGridValues(CELLS_RESERVATIONS_WEAPONS, maxValues.weaponTokens)
+    //updateValues(CELLS_RESERVATIONS_TRINKETS, maxValues.trinkets)
 
     //Update the service/buyer/funnelers area on the far right (used for raids to know who their funnelers are that week)
     updateRaidRosterInfo()
@@ -964,38 +964,34 @@ function getMaxValues(sheet, raidRoster, reservations){
         let carrySheet = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
             SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Raid Information") : sheet
 
-        for (let bossIndex in BOSSES){
-            if (SERVICES_AVAIL[bossIndex]) {
+        for (let serviceIndex in SERVICES){
+            let service = SERVICES[serviceIndex]
+
+            Logger.log("Service: " + serviceIndex + " Available: " + SERVICES_AVAIL[service])
+            if (SERVICES_AVAIL[serviceIndex]){
                 let maxCarry = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
-                    carrySheet.getRange(CELLS_RAIDINFO_BOSSES[BOSSES[bossIndex]]).getValue() :
-                    carrySheet.getRange(CELLS_RESERVATIONS_BOSSES[BOSSES[bossIndex]].MAX).getValue()
+                    carrySheet.getRange(CELLS_RAIDINFO_BOSSES[service]).getValue() :
+                    carrySheet.getRange(CELLS_RESERVATIONS_BOSSES[service].MAX).getValue()
+
+                Logger.log("For " + service + "...")
+
                 if (maxCarry > 0) {
-                    for (let resIndex in reservations) {
+                    for (let resIndex in reservations){
                         let reservation = reservations[resIndex]
-                        switch (reservation.service) {
-                            case SERVICES.FULL_CLEAR:
-                                maxCarry--
-                                break;
-                            case SERVICES.LAST_WING:
-                                if (
-                                    BOSSES[bossIndex] === SERVICES.SLUDGEFIST ||
-                                    BOSSES[bossIndex] === SERVICES.STONE_LEGION_GENERALS ||
-                                    BOSSES[bossIndex] === SERVICES.SIRE_DENATHRIUS
-                                ) {
-                                    maxCarry--
-                                }
-                                break;
-                            default:
-                                if (BOSSES[bossIndex] === reservations[resIndex].service) {
-                                    maxCarry--
-                                }
-                                break;
+
+                        Logger.log("Checking " + reservation.service + "...")
+                        if (service === reservation.service){
+                            maxCarry--
+
+                            Logger.log("Reservation matches service. New available is " + maxCarry)
                         }
                     }
                 }
-                maxCarries[BOSSES[bossIndex]] = maxCarry
+
+                maxCarries[service] = maxCarry
             }
         }
+
         Logger.log("---MAX CARRIES---")
         Logger.log(maxCarries)
         return maxCarries
@@ -1136,7 +1132,6 @@ function isPlayerReserved(reservations, boss, player){
         }
 
         if (isBooster){
-            Logger.log("Player is reserved!")
             break;
         }
     }
@@ -1146,7 +1141,6 @@ function isPlayerReserved(reservations, boss, player){
     function isPlayerBooster(player, boosters){
         for (let index in boosters){
             if (boosters[index].mainName === player.playerName){
-                Logger.log(player.playerName + " is booster!")
                 return true
             }
         }
