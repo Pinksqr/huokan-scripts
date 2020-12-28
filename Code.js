@@ -720,6 +720,8 @@ function handleReservations(sheet, range, value){
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnel option required for funnel")
             case (buyer.funnelType && buyer.funnelOpt && !buyer.funnels):
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels must be greater than 0")
+            case (buyer.service !== SERVICES.FULL_CLEAR && (buyer.funnelType !== null || buyer.funnelOpt !== null)):
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels unavailable for this service")
         }
 
 
