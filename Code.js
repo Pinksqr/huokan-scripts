@@ -253,15 +253,25 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      */
     function handleService(cells, values) {
         if (values.service && !values.type /*implies !values.option*/ ){
+            Logger.log(1)
             filter(cells.type, getFilteredTypes(values.service))
         } else if (values.service && values.type) {
-            filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
+            if (values.service === SERVICES.FULL_CLEAR) {
+                filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
+            } else {
+                cells.
+                cells.option.clearContent().clearDataValidations()
+                cells.type.clearContent().clearDataValidations()
+            }
         } else if (!values.service && values.type && values.option) {
+            Logger.log(3)
             filter(cells.option, getFilteredOptions(values.type))
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (!values.service && values.type && !values.option){
+            Logger.log(4)
             filter(cells.type, getAvailableFunnelTypes())
             filter(cells.option, getFilteredOptions(values.type))
+        } else if (values.service !== SERVICES.FULL_CLEAR){
         }
     }
 
@@ -708,6 +718,9 @@ function handleReservations(sheet, range, value){
      */
     function handleReservation(raidRoster, reservations, buyer){
 
+        Logger.log("Handling reservation..." + buyer.funnelType.length + "**" + buyer.funnelOpt.length + "**")
+        Logger.log(buyer.funnelType.length !== "" || buyer.funnelOpt.length !== "")
+
         //Check that all required columns are properly filled
         switch (true){
             case !buyer.buyerName:
@@ -720,7 +733,7 @@ function handleReservations(sheet, range, value){
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnel option required for funnel")
             case (buyer.funnelType && buyer.funnelOpt && !buyer.funnels):
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels must be greater than 0")
-            case (buyer.service !== SERVICES.FULL_CLEAR && (buyer.funnelType !== null || buyer.funnelOpt !== null)):
+            case (buyer.service !== SERVICES.FULL_CLEAR && (buyer.funnelType !== "" || buyer.funnelOpt !== "")):
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels unavailable for this service")
         }
 
