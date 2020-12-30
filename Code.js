@@ -287,8 +287,9 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleOption(cells, values){
-        Logger.log("Handling option...")
         if (!values.service && values.option){
+            filter(cells.service, getFilteredServices(values.type, values.option))
+        } else if (values.service && values.option) {
             filter(cells.service, getFilteredServices(values.type, values.option))
         } else if (!values.option){
             filter(cells.service, Object.values(SERVICES))
@@ -306,13 +307,17 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             case FUNNEL_TYPES.ARMOR:
                 return Object.values(SERVICES)
             case FUNNEL_TYPES.WEAPON:
-                for (let boss in BOSSES){
-                    for (let weapon in BOSS_WEAPONS[BOSSES[boss]]){
-                        if (option === BOSS_WEAPONS[BOSSES[boss]][weapon]) {
-                            return [BOSSES[BOSS_WEAPONS[BOSSES[boss]]]]
+                let bosses = []
+                for (let bossIndex in BOSSES){
+                    let boss = BOSSES[bossIndex]
+                    for (let weaponIndex in BOSS_WEAPONS[boss]){
+                        let weapon = BOSS_WEAPONS[boss][weaponIndex]
+                        if (option === weapon) {
+                            bosses.push(boss)
                         }
                     }
                 }
+                return bosses
                 break;
             case FUNNEL_TYPES.TRINKET:
                 for (let boss in BOSSES){
@@ -687,7 +692,12 @@ function handleReservations(sheet, range, value){
         if (isSpotAvailable()){
             //Is it a carry, or a funnel?
             if (buyer.funnels > 0){
-                return reserveFunnel()
+                //Check if selection matches what is possible
+                if (isFunnelValid(buyer.service, buyer.type, buyer.option)) {
+                    return reserveFunnel()
+                } else {
+                    return new ReservationResponse (false, MESSAGES.FAILURE, "Funnel options not available for this service")
+                }
             }else{
                 return reserveCarry()
             }
@@ -699,6 +709,18 @@ function handleReservations(sheet, range, value){
         function isSpotAvailable(){
             let availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue()
             return availableCarries > 0 ? true : false
+        }
+
+        function isFunnelValid(service, type, option){
+            let validFunnel = false
+            switch(type){
+                case FUNNEL_TYPES.WEAPON:
+                    break
+                case FUNNEL_TYPES.TRINKET:
+                    validFunnel = BOSS_TRINKETS[service][option] !== null ? true : false 
+                    break
+            }
+            return validFunnel
         }
 
         /**
