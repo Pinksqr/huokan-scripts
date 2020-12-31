@@ -100,17 +100,21 @@ function updateRaidRoster(sheet, range){
         //Create main raiders and add to roster
         for (let row in mainSheetValues) {
             let currentRow  = mainSheetValues[row];
+            let away        = currentRow[COLUMNS_RAIDMAINS.AWAY];
             let available   = currentRow[COLUMNS_RAIDMAINS.AVAILABLE];
             let playerName  = currentRow[COLUMNS_RAIDMAINS.PLAYER_NAME];
             let playerClass = currentRow[COLUMNS_RAIDMAINS.PLAYER_CLASS];
             let lootSpecs   = [];
 
-            COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
-                lootSpecs.push(currentRow[col]);
-            });
+            //If the player is away, they are not added to the roster
+            if (!away) {
+                COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
+                    lootSpecs.push(currentRow[col]);
+                });
 
-            if (playerName && playerClass && lootSpecs && available) {
-                raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
+                if (playerName && playerClass && lootSpecs) {
+                    raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
+                }
             }
         }
 
@@ -142,6 +146,7 @@ function updateRaidRoster(sheet, range){
             }
         }
 
+        Logger.log(raidRoster)
         return raidRoster;
     }
 

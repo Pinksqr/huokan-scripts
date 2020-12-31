@@ -163,10 +163,11 @@ const CELLS_RESERVATIONS_TRINKETS = {
 /** RAID MAINS & RAID ALTS SHEET */
 
 const COLUMNS_RAIDMAINS = {
-    AVAILABLE       : 1,
-    PLAYER_NAME     : 2,
-    PLAYER_CLASS    : 3,
-    LOOT_SPECS      : [4, 6, 8, 10]
+    AWAY            : 1,
+    AVAILABLE       : 2,
+    PLAYER_NAME     : 3,
+    PLAYER_CLASS    : 4,
+    LOOT_SPECS      : [5, 7, 9, 11]
 };
 
 const COLUMNS_RAIDALTS = {
