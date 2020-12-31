@@ -72,13 +72,31 @@ function updateRaidRoster(sheet, range){
             let raidRoster = createRaidRoster()
             let maxValues = getMaxValues(sheet, raidRoster, [])
 
-            //Sorts the raid roster by number of alts assigned to that raider
-            raidRoster.sort(function(a, b){
-                return a.alts.length - b.alts.length
+            //Sort roster by player's combined available main + alts
+            let sortedRaidRoster = raidRoster.sort(function(a, b) {
+                let aCount = 0
+                let bCount = 0
+
+                if (a.available) { aCount++ }
+                if (b.available) { bCount++ }
+
+                for (let index in a.alts){
+                    if (a.alts[index].available){
+                        aCount++
+                    }
+                }
+                for (let index in b.alts){
+                    if (b.alts[index].available){
+                        bCount++
+                    }
+                }
+
+                return aCount - bCount;
             })
 
+            Logger.log(sortedRaidRoster)
             //Add raidRoster to properties (must be present & sorted in case a new reservation sheet is made)
-            properties.setProperty("raidRoster", JSON.stringify(raidRoster))
+            properties.setProperty("raidRoster", JSON.stringify(sortedRaidRoster))
 
             updateProperties(maxValues)
         }
@@ -146,7 +164,6 @@ function updateRaidRoster(sheet, range){
             }
         }
 
-        Logger.log(raidRoster)
         return raidRoster;
     }
 
@@ -179,6 +196,7 @@ function updateRaidRoster(sheet, range){
             }
         }
     }
+
 }
 
 /**
@@ -617,16 +635,23 @@ function handleReservations(sheet, range, value){
             let reservations = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).getValue())
             let buyer = {
                 buyerName   : sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_NAME).getValue(),
+                discordId   : sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_DISCID).getValue(),
                 className   : sheet.getRange(row, COLUMNS_RESERVATIONS.CLASS).getValue().toUpperCase(),
+                specName    : sheet.getRange(row, COLUMNS_RESERVATIONS.SPEC).getValue().toUpperCase(),
                 service     : sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE).getValue().toUpperCase(),
                 funnels     : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS).getValue(),
                 funnelType  : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_TYPE).getValue().toUpperCase(),
                 funnelOpt   : sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION).getValue().toUpperCase(),
             }
 
+            let priceInfo = {
+                listedPrice : sheet.getRange(row, COLUMNS_RESERVATIONS.LISTED_PRICE).getValue(),
+                paidBalance : sheet.getRange(row, COLUMNS_RESERVATIONS.PAID_BAL).getValue()
+            }
+
             //Determine if this is a reservation request, or a cancellation request
             if (range.isChecked()) {
-                response = handleReservation(raidRoster, reservations, buyer)
+                response = handleReservation(raidRoster, reservations, buyer, priceInfo)
             } else {
                 response = handleCancellation(raidRoster, reservations, buyer)
             }
@@ -676,12 +701,16 @@ function handleReservations(sheet, range, value){
      * @param buyer
      * @returns {ReservationResponse}
      */
-    function handleReservation(raidRoster, reservations, buyer){
+    function handleReservation(raidRoster, reservations, buyer, priceInfo){
 
         //Check that all required columns are properly filled
         switch (true){
             case !buyer.buyerName:
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Buyer name missing")
+            case !buyer.discordId:
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Buyer Discord ID missing")
+            case (!buyer.className || !buyer.specName):
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Buyer class/spec missing")
             case !buyer.service:
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Service missing")
             case (buyer.funnels > 0 && !buyer.funnelType):
@@ -690,15 +719,18 @@ function handleReservations(sheet, range, value){
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnel option required for funnel")
             case (buyer.funnelType && buyer.funnelOpt && !buyer.funnels):
                 return new ReservationResponse(false, MESSAGES.FAILURE, "Funnels must be greater than 0")
+            case !priceInfo.listedPrice:
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Listed price must be greater than 0")
+            case (!priceInfo.paidBalance || priceInfo.paidBalance < (priceInfo.listedPrice * 0.15)):
+                return new ReservationResponse(false, MESSAGES.FAILURE, "Paid (deposit) must be at least 15% of listed price")
         }
-
 
         //Is there a carry spot?
         if (isSpotAvailable()){
             //Is it a carry, or a funnel?
             if (buyer.funnels > 0){
                 //Check if selection matches what is possible
-                if (isFunnelValid(buyer.service, buyer.type, buyer.option)) {
+                if (isFunnelValid(buyer.service, buyer.funnelType, buyer.funnelOpt)) {
                     return reserveFunnel()
                 } else {
                     return new ReservationResponse (false, MESSAGES.FAILURE, "Funnel options not available for this service")
@@ -713,17 +745,20 @@ function handleReservations(sheet, range, value){
         /** Checks if a carry spot is available for the reservation request */
         function isSpotAvailable(){
             let availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue()
-            return availableCarries > 0 ? true : false
+            return availableCarries > 0
         }
 
         function isFunnelValid(service, type, option){
             let validFunnel = false
             switch(type){
                 case FUNNEL_TYPES.WEAPON:
+                    validFunnel = BOSS_WEAPONS[service].includes(option)
                     break
                 case FUNNEL_TYPES.TRINKET:
-                    validFunnel = BOSS_TRINKETS[service][option] !== null ? true : false 
+                    validFunnel = BOSS_TRINKETS[service].includes(option)
                     break
+                case FUNNEL_TYPES.ARMOR:
+                    return true //All armor funnels are valid for mythic sheets, by default
             }
             return validFunnel
         }
@@ -1182,11 +1217,12 @@ function isTrinketLootable(trinket, player) {
 
 /** Armor is lootable if the player, or any alts, are of that armor class */
 function getArmorLootable(armorType, player) {
-    if (armorType === CLASS_ARMORTYPES[player.playerClass]){
+    if (armorType === CLASS_ARMORTYPES[player.playerClass] && player.available){
         return player
     } else {
         for (let altIndex in player.alts){
-            if (armorType === CLASS_ARMORTYPES[player.alts[altIndex].playerClass]){
+            let alt = player.alts[altIndex]
+            if (armorType === CLASS_ARMORTYPES[player.alts[altIndex].playerClass] && alt.available){
                 return player.alts[altIndex]
             }
         }
@@ -1196,12 +1232,12 @@ function getArmorLootable(armorType, player) {
 
 /** Token is lootable if the player, or any of their alts, can loot the token from the specific boss */
 function getTokenLootable(token, boss, player){
-    if (token === CLASS_TOKENS[player.playerClass]){
+    if (token === CLASS_TOKENS[player.playerClass] && player.available){
         return player
     } else {
         for (let altIndex in player.alts){
             let alt = player.alts[altIndex]
-            if (alt.available && token === CLASS_TOKENS[alt.playerClass]){
+            if (alt.available && token === CLASS_TOKENS[alt.playerClass] && alt.available){
                 return alt
             }
         }
@@ -1215,7 +1251,7 @@ function getTrinketLootable(trinket, player){
 
     //Check player
     for (let index in playerTrinkets){
-        if (trinket === playerTrinkets[index]){
+        if (trinket === playerTrinkets[index] && player.available){
             return player
         }
     }
@@ -1224,7 +1260,7 @@ function getTrinketLootable(trinket, player){
         let alt = player.alts[altIndex]
         let altTrinkets = getLootableTrinkets(alt)
         for (let trinketIndex in altTrinkets){
-            if (alt.available && trinket === altTrinkets[trinketIndex]){
+            if (trinket === altTrinkets[trinketIndex] && alt.available){
                 return alt
             }
         }

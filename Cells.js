@@ -164,10 +164,10 @@ const CELLS_RESERVATIONS_TRINKETS = {
 
 const COLUMNS_RAIDMAINS = {
     AWAY            : 1,
-    AVAILABLE       : 2,
-    PLAYER_NAME     : 3,
-    PLAYER_CLASS    : 4,
-    LOOT_SPECS      : [5, 7, 9, 11]
+    AVAILABLE       : 3,
+    PLAYER_NAME     : 4,
+    PLAYER_CLASS    : 5,
+    LOOT_SPECS      : [6, 8, 10, 12]
 };
 
 const COLUMNS_RAIDALTS = {
@@ -193,6 +193,10 @@ const COLUMNS_RESERVATIONS = {
     NOTE            : 23,
     CHECKBOX        : 24,
     STATUS          : 25,
+    LISTED_PRICE    : 27,
+    CHARGED_PRICE   : 28,
+    PAID_BAL        : 29,
+    REMAINING_BAL   : 30,
     RAID_SERVICE    : 33,
     RAID_BUYER      : 34,
     RAID_BOOSTER    : 35
