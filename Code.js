@@ -238,17 +238,20 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
 
         if (row > 7 && (
             col === COLUMNS_RESERVATIONS.SERVICE ||
+            col === COLUMNS_RESERVATIONS.FUNNELS ||
             col === COLUMNS_RESERVATIONS.FUNNEL_TYPE ||
             col === COLUMNS_RESERVATIONS.FUNNEL_OPTION
         )) {
             let cells = {
                 service: sheet.getRange(row, COLUMNS_RESERVATIONS.SERVICE),
+                funnels: sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNELS),
                 type: sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_TYPE),
                 option: sheet.getRange(row, COLUMNS_RESERVATIONS.FUNNEL_OPTION)
             }
 
             let values = {
                 service: cells.service.getValue().toUpperCase(),
+                funnels: cells.funnels.getValue(),
                 type: cells.type.getValue().toUpperCase(),
                 option: cells.option.getValue().toUpperCase()
             }
@@ -257,13 +260,16 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             switch (col){
                 case COLUMNS_RESERVATIONS.SERVICE:
                     handleService(cells, values)
-                    break;
+                    break
+                case COLUMNS_RESERVATIONS.FUNNELS:
+                    handleFunnels(cells, values)
+                    break
                 case COLUMNS_RESERVATIONS.FUNNEL_TYPE:
                     handleType(cells, values)
-                    break;
+                    break
                 case COLUMNS_RESERVATIONS.FUNNEL_OPTION:
                     handleOption(cells,values)
-                    break;
+                    break
             }
         }
     }
@@ -285,6 +291,14 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
         } else if (!values.service && values.type && !values.option){
             filter(cells.type, Object.values(FUNNEL_TYPES))
             filter(cells.option, getFilteredOptions(values.type))
+        }
+    }
+
+    function handleFunnels(cells, values) {
+        Logger.log("handling funnels...")
+        if (!values.funnels || values.funnels === 0) {
+            cells.type.clearContent()
+            cells.option.clearContent()
         }
     }
 
