@@ -281,24 +281,54 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleService(cells, values) {
-        if (values.service && !values.type /*implies !values.option*/ ){
-            filter(cells.type, getFilteredTypes(values.service))
-        } else if (values.service && values.type) {
-            filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
-        } else if (!values.service && values.type && values.option) {
-            filter(cells.option, getFilteredOptions(values.type))
-            filter(cells.service, getFilteredServices(values.type, values.option))
-        } else if (!values.service && values.type && !values.option){
-            filter(cells.type, Object.values(FUNNEL_TYPES))
-            filter(cells.option, getFilteredOptions(values.type))
+        Logger.log("Handling service...")
+        Logger.log(values)
+
+        switch (true) {
+            case !!values.service && !!values.type && !!values.option:
+                if (isServiceTypeOptionValid(values.service, values.type, values.option)) {
+                    filter(cells.service, Object.values(SERVICES))
+                } else {
+                    cells.type.clearContent().clearDataValidations()
+                    cells.option.clearContent().clearDataValidations()
+                    filter(cells.service, Object.values(SERVICES))
+                    filter(cells.type, getTypesByService(values.service))
+                }
+                break
+
+            case !!values.service && !!values.type && !values.option:
+                filter(cells.option, getOptionsByServiceType(values.service, values.type))
+                break
+
+            case !!values.service && !values.type && !values.option:
+                filter(cells.type, getTypesByService(values.service))
+                break
+
+            case !values.service && !!values.type && !!values.option:
+                filter(cells.service, getServicesByTypeOption(values.type, values.option))
+                filter(cells.option, getOptionsByType(values.type))
+                break
+
+            case !values.service && !!values.type && !values.option:
+                filter(cells.service, getServicesByType(values.type))
+                filter(cells.option, getOptionsByType(values.type))
+                break
+
+            case !values.service && !values.type && !values.option:
+                filter(cells.service, Object.values(SERVICES))
         }
     }
 
+    /**
+     * Clears funnel type/option when the funnel # is set to 0 or cleared
+     * @param cells
+     * @param values
+     */
     function handleFunnels(cells, values) {
-        Logger.log("handling funnels...")
+        Logger.log("Handling funnels...")
         if (!values.funnels || values.funnels === 0) {
             cells.type.clearContent()
-            cells.option.clearContent()
+            cells.option.clearContent().clearDataValidations()
         }
     }
 
@@ -308,13 +338,42 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleType(cells, values){
-        if (!values.service && values.type){
-            filter(cells.option, getFilteredOptions(values.type))
-        } else if (values.service && values.type){
-            filter(cells.option, getFilteredOptionsWithService(values.service, values.type))
-        } else if (!values.type){
-            filter(cells.service, Object.values(SERVICES))
-            cells.option.clearContent().clearDataValidations()
+        Logger.log("Handling type...")
+        Logger.log(values)
+
+        switch (true) {
+            case !!values.service && !!values.type && !!values.option:
+                cells.option.clearContent().clearDataValidations()
+                filter(cells.option, getOptionsByType(values.type))
+                break
+
+            case !!values.service && !!values.type && !values.option:
+                filter(cells.option, getOptionsByServiceType(values.service, values.type))
+                break
+
+            case !values.service && !!values.type && !values.option:
+                filter(cells.option, getOptionsByType(values.type))
+                filter(cells.service, getServicesByType(values.type))
+                break
+
+            case !values.service && !!values.type && !!values.option:
+                if (!isTypeOptionValid(values.type, values.option)){
+                    cells.option.clearContent().clearDataValidations()
+                    filter(cells.option, getOptionsByType(values.type))
+                    filter(cells.service, getServicesByType(values.type))
+                }
+                break
+
+            case !!values.service && !values.type: // Always removed regardless of chosen option
+                cells.option.clearContent().clearDataValidations()
+                filter(cells.service, Object.values(SERVICES))
+
+            case !values.service && !values.type:
+                cells.option.clearContent().clearDataValidations()
+                filter(cells.service, Object.values(SERVICES))
+                filter(cells.type, Object.values(FUNNEL_TYPES))
+                break
+
         }
     }
 
@@ -324,12 +383,50 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param values
      */
     function handleOption(cells, values){
-        if (!values.service && values.option){
-            filter(cells.service, getFilteredServices(values.type, values.option))
-        } else if (values.service && values.option) {
-            filter(cells.service, getFilteredServices(values.type, values.option))
-        } else if (!values.option){
-            filter(cells.service, Object.values(SERVICES))
+        Logger.log("Handling option...")
+        Logger.log(values)
+
+        switch (true) {
+            case !!values.service && !!values.type && !!values.option:
+                filter(cells.service, Object.values(SERVICES))
+                break
+
+            case !values.service && !!values.type && !!values.option:
+                filter(cells.service, getServicesByTypeOption(values.type, values.option))
+                break
+
+            case !values.service && !!values.type && !values.option:
+                filter(cells.service, getServicesByType(values.type))
+                break
+        }
+    }
+
+    function getServicesByType(type){
+        switch (type) {
+            case FUNNEL_TYPES.ARMOR:
+                return Object.values(SERVICES)
+
+            case FUNNEL_TYPES.WEAPON:
+                let weaponBosses = []
+                for (let bossIndex in BOSSES){
+                    let boss = BOSSES[bossIndex]
+
+                    if (BOSS_WEAPONS[boss].length > 0){
+                        weaponBosses.push(boss)
+                    }
+                }
+                return weaponBosses
+
+            case FUNNEL_TYPES.TRINKET:
+                let trinketBosses = []
+                for (let bossIndex in BOSSES){
+                    let boss = BOSSES[bossIndex]
+
+                    if (BOSS_TRINKETS[boss].length > 0){
+                        trinketBosses.push(boss)
+                    }
+                }
+                return trinketBosses
         }
     }
 
@@ -339,7 +436,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param option
      * @returns {(string)[]|*[]}
      */
-    function getFilteredServices(type, option){
+    function getServicesByTypeOption(type, option){
         switch (type){
             case FUNNEL_TYPES.ARMOR:
                 return Object.values(SERVICES)
@@ -373,7 +470,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param service
      * @returns {string[]|(string)[]|(string)[]}
      */
-    function getFilteredTypes(service){
+    function getTypesByService(service){
         //If service is full clear, you cannot book a trinket or weapon funnel
         if (service === SERVICES.FULL_CLEAR){
             return [FUNNEL_TYPES.ARMOR]
@@ -393,7 +490,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param type
      * @returns {(string)[]|(string)[]}
      */
-    function getFilteredOptions(type){
+    function getOptionsByType(type){
         switch (type){
             case FUNNEL_TYPES.ARMOR:
                 return Object.values(ARMOR_TYPES)
@@ -411,7 +508,7 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      * @param type
      * @returns {*|(string)[]}
      */
-    function getFilteredOptionsWithService(service, type){
+    function getOptionsByServiceType(service, type){
         switch(service){
             case SERVICES.FULL_CLEAR:
             case SERVICES.LAST_WING:
@@ -447,7 +544,6 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
             cell.setDataValidation(dataRule)
         }
     }
-
 }
 
 /**
@@ -744,7 +840,7 @@ function handleReservations(sheet, range, value){
             //Is it a carry, or a funnel?
             if (buyer.funnels > 0){
                 //Check if selection matches what is possible
-                if (isFunnelValid(buyer.service, buyer.funnelType, buyer.funnelOpt)) {
+                if (isServiceTypeOptionValid(buyer.service, buyer.funnelType, buyer.funnelOpt)) {
                     return reserveFunnel()
                 } else {
                     return new ReservationResponse (false, MESSAGES.FAILURE, "Funnel options not available for this service")
@@ -760,21 +856,6 @@ function handleReservations(sheet, range, value){
         function isSpotAvailable(){
             let availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue()
             return availableCarries > 0
-        }
-
-        function isFunnelValid(service, type, option){
-            let validFunnel = false
-            switch(type){
-                case FUNNEL_TYPES.WEAPON:
-                    validFunnel = BOSS_WEAPONS[service].includes(option)
-                    break
-                case FUNNEL_TYPES.TRINKET:
-                    validFunnel = BOSS_TRINKETS[service].includes(option)
-                    break
-                case FUNNEL_TYPES.ARMOR:
-                    return true //All armor funnels are valid for mythic sheets, by default
-            }
-            return validFunnel
         }
 
         /**
@@ -1227,6 +1308,48 @@ function isTokenLootable(token, boss, player) {
 function isTrinketLootable(trinket, player) {
     let filteredPlayer = getTrinketLootable(trinket, player)
     return (typeof filteredPlayer === 'object' && filteredPlayer !== null)
+}
+
+function isServiceTypeOptionValid(service, type, option){
+    let valid = false
+    switch(type){
+        case FUNNEL_TYPES.WEAPON:
+            valid = BOSS_WEAPONS[service].includes(option)
+            break
+        case FUNNEL_TYPES.TRINKET:
+            valid = BOSS_TRINKETS[service].includes(option)
+            break
+        case FUNNEL_TYPES.ARMOR:
+            return true //All armor funnels are valid for mythic sheets, by default
+    }
+    return valid
+}
+
+function isTypeOptionValid(type, option){
+    let valid = false
+    switch(type){
+        case FUNNEL_TYPES.WEAPON:
+            valid = isOptionInType(option, TOKENS)
+            break
+
+        case FUNNEL_TYPES.TRINKET:
+            valid = isOptionInType(option, TRINKETS)
+            break
+
+        case FUNNEL_TYPES.ARMOR:
+            valid = isOptionInType(option, ARMOR_TYPES)
+            break
+    }
+    Logger.log("Type option for " + type + " " + option + " is " + valid)
+    return valid
+
+    function isOptionInType(option, collection){
+        for (const key in collection){
+            if (option === collection[key]){
+                return true
+            }
+        }
+    }
 }
 
 /** Armor is lootable if the player, or any alts, are of that armor class */
