@@ -100,17 +100,21 @@ function updateRaidRoster(sheet, range){
         //Create main raiders and add to roster
         for (let row in mainSheetValues) {
             let currentRow  = mainSheetValues[row];
+            let away        = currentRow[COLUMNS_RAIDMAINS.AWAY];
             let available   = currentRow[COLUMNS_RAIDMAINS.AVAILABLE];
             let playerName  = currentRow[COLUMNS_RAIDMAINS.PLAYER_NAME];
             let playerClass = currentRow[COLUMNS_RAIDMAINS.PLAYER_CLASS];
             let lootSpecs   = [];
 
-            COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
-                lootSpecs.push(currentRow[col]);
-            });
+            //If the player is away, they are not added to the roster
+            if (!away) {
+                COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
+                    lootSpecs.push(currentRow[col]);
+                });
 
-            if (playerName && playerClass && lootSpecs && available) {
-                raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
+                if (playerName && playerClass && lootSpecs) {
+                    raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
+                }
             }
         }
 
@@ -931,7 +935,7 @@ function updateReservationSheet(sheet, raidRoster, reservations){
 /** -- Helper functions -- **/
 
 function toTitleCase(str){
-    return str.length > 0 ? str.toLowerCase().split(" ").map(function (val) {
+    return (str && str.length > 0) ? str.toLowerCase().split(" ").map(function (val) {
         return val.replace(val[0], val[0].toUpperCase())
     }).join(" ") : ""
 }
@@ -1207,11 +1211,11 @@ function isTrinketLootable(trinket, player) {
 
 /** Armor is lootable if the player, or any alts, are of that armor class */
 function getArmorLootable(armorType, player) {
-    if (armorType === CLASS_ARMORTYPES[player.playerClass]){
+    if (armorType === CLASS_ARMORTYPES[player.playerClass] && player.available){
         return player
     } else {
         for (let altIndex in player.alts){
-            if (armorType === CLASS_ARMORTYPES[player.alts[altIndex].playerClass]){
+            if (armorType === CLASS_ARMORTYPES[player.alts[altIndex].playerClass] && alt.available){
                 return player.alts[altIndex]
             }
         }
@@ -1221,12 +1225,12 @@ function getArmorLootable(armorType, player) {
 
 /** Token is lootable if the player, or any of their alts, can loot the token from the specific boss */
 function getTokenLootable(token, boss, player){
-    if (token === CLASS_TOKENS[player.playerClass]){
+    if (token === CLASS_TOKENS[player.playerClass] && player.available){
         return player
     } else {
         for (let altIndex in player.alts){
             let alt = player.alts[altIndex]
-            if (alt.available && token === CLASS_TOKENS[alt.playerClass]){
+            if (alt.available && token === CLASS_TOKENS[alt.playerClass] && alt.available){
                 return alt
             }
         }
@@ -1240,7 +1244,7 @@ function getTrinketLootable(trinket, player){
 
     //Check player
     for (let index in playerTrinkets){
-        if (trinket === playerTrinkets[index]){
+        if (trinket === playerTrinkets[index] && player.available){
             return player
         }
     }
@@ -1249,7 +1253,7 @@ function getTrinketLootable(trinket, player){
         let alt = player.alts[altIndex]
         let altTrinkets = getLootableTrinkets(alt)
         for (let trinketIndex in altTrinkets){
-            if (alt.available && trinket === altTrinkets[trinketIndex]){
+            if (trinket === altTrinkets[trinketIndex] && alt.available){
                 return alt
             }
         }
