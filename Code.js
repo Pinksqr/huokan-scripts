@@ -888,9 +888,9 @@ function handleReservations(sheet, range, value){
                 for (let playerIndex in raidRoster){
                     let player = raidRoster[playerIndex]
 
-                    /* If the raider is not assigned to a previous funnel slot (1, 2, 3, or 4) and
-                     isn't currently reserved, then we can see if they match the buyer's criteria */
-                    if (!isPlayerMatched(player, matches) && !isPlayerReserved(reservations, buyer.service, player)){
+                    /* If the raider is not assigned to a previous funnel slot (1, 2, 3, or 4), isn't reserved,
+                        and is available, then check if they match the buyer's criteria */
+                    if (!isPlayerMatched(player, matches) && !isPlayerReserved(reservations, buyer.service, player) && isPlayerAvailable(buyer.service, player)){
                         let booster
                         switch(buyer.funnelType){
                             case FUNNEL_TYPES.ARMOR:
