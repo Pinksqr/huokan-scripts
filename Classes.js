@@ -8,11 +8,12 @@
  * available: if the player is currently available (not sitting/out/saved)
  */
 class RaidMember {
-    constructor(playerName, playerClass, lootSpecs, available){
+    constructor(playerName, playerClass, lootSpecs, available, availableBosses){
         this.playerName = playerName
         this.playerClass = playerClass
         this.lootSpecs = lootSpecs
         this.available = available
+        this.availableBosses = availableBosses
     }
 }
 
@@ -22,14 +23,14 @@ class RaidMember {
  * alts: An array of RaidMembers, each representing an alt that the main raider has.
  */
 class RaidMain extends RaidMember {
-    constructor(playerName, playerClass, lootSpecs, available, away) {
-        super(playerName, playerClass, lootSpecs, available)
+    constructor(playerName, playerClass, lootSpecs, available, away, availableBosses) {
+        super(playerName, playerClass, lootSpecs, available, availableBosses)
         this.away = false;
         this.alts = []
     }
 
-    addAlt(altName, altClass, lootSpecs, available) {
-        let alt = new RaidMember(altName, altClass, lootSpecs, available)
+    addAlt(altName, altClass, lootSpecs, available, availableBosses) {
+        let alt = new RaidMember(altName, altClass, lootSpecs, available, availableBosses)
         this.alts.push(alt)
         return alt
     }

@@ -167,7 +167,8 @@ const COLUMNS_RAIDMAINS = {
     AVAILABLE       : 3,
     PLAYER_NAME     : 4,
     PLAYER_CLASS    : 5,
-    LOOT_SPECS      : [6, 8, 10, 12]
+    LOOT_SPECS      : [6, 8, 10, 12],
+    AVAILABLE_8     : 14
 };
 
 const COLUMNS_RAIDALTS = {
@@ -175,7 +176,8 @@ const COLUMNS_RAIDALTS = {
     MAIN_NAME   : 2,
     ALT_NAME    : 3,
     ALT_CLASS   : 4,
-    LOOT_SPECS  : [5, 7, 9, 11]
+    LOOT_SPECS  : [5, 7, 9, 11],
+    AVAILABLE_8 : 13
 };
 
 const COLUMNS_RESERVATIONS = {

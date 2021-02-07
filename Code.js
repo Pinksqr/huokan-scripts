@@ -111,27 +111,39 @@ function updateRaidRoster(sheet, range){
         let spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
         let mainSheet = spreadsheet.getSheetByName("Raid Mains");
         let altSheet = spreadsheet.getSheetByName("Raid Alts");
-        let mainSheetValues = mainSheet.getSheetValues(6, 1, mainSheet.getLastRow(), 11);
-        let altSheetValues = altSheet.getSheetValues(6, 1, altSheet.getLastRow(), 12);
+        let mainSheetValues = mainSheet.getSheetValues(6, 1, mainSheet.getLastRow(), mainSheet.getLastColumn());
+        let altSheetValues = altSheet.getSheetValues(6, 1, altSheet.getLastRow(), altSheet.getLastColumn());
         let raidRoster = []; //new RaidRoster();
 
         //Create main raiders and add to roster
         for (let row in mainSheetValues) {
-            let currentRow  = mainSheetValues[row];
-            let away        = currentRow[COLUMNS_RAIDMAINS.AWAY];
-            let available   = currentRow[COLUMNS_RAIDMAINS.AVAILABLE];
-            let playerName  = currentRow[COLUMNS_RAIDMAINS.PLAYER_NAME];
-            let playerClass = currentRow[COLUMNS_RAIDMAINS.PLAYER_CLASS];
-            let lootSpecs   = [];
+            let currentRow      = mainSheetValues[row];
+            let away            = currentRow[COLUMNS_RAIDMAINS.AWAY];
+            let available       = currentRow[COLUMNS_RAIDMAINS.AVAILABLE];
+            let playerName      = currentRow[COLUMNS_RAIDMAINS.PLAYER_NAME];
+            let playerClass     = currentRow[COLUMNS_RAIDMAINS.PLAYER_CLASS];
+            let lootSpecs       = [];
+            let availableBosses = {
+                firstEight: currentRow[COLUMNS_RAIDMAINS.AVAILABLE_8]
+            };
 
             //If the player is away, they are not added to the roster
             if (!away) {
+
+                //Add specs
                 COLUMNS_RAIDMAINS.LOOT_SPECS.forEach(function (col) {
                     lootSpecs.push(currentRow[col]);
                 });
 
+                //Add new main
                 if (playerName && playerClass && lootSpecs) {
-                    raidRoster.push(new RaidMain(playerName, playerClass.toUpperCase(), lootSpecs, available));
+                    raidRoster.push(new RaidMain(
+                        playerName,
+                        playerClass.toUpperCase(),
+                        lootSpecs,
+                        available,
+                        availableBosses
+                    ));
                 }
             }
         }
@@ -144,6 +156,9 @@ function updateRaidRoster(sheet, range){
             let altName     = currentRow[COLUMNS_RAIDALTS.ALT_NAME];
             let altClass    = currentRow[COLUMNS_RAIDALTS.ALT_CLASS];
             let lootSpecs   = [];
+            let availableBosses = {
+                firstEight: currentRow[COLUMNS_RAIDALTS.AVAILABLE_8]
+            };
 
             COLUMNS_RAIDALTS.LOOT_SPECS.forEach(function (col) {
                 lootSpecs.push(currentRow[col]);
@@ -152,7 +167,7 @@ function updateRaidRoster(sheet, range){
             let main = getMainByName(mainName);
 
             if (main && altName && altClass && lootSpecs) {
-                main.addAlt(altName, altClass.toUpperCase(), lootSpecs, available);
+                main.addAlt(altName, altClass.toUpperCase(), lootSpecs, available, availableBosses);
             }
         }
 
