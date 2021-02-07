@@ -116,6 +116,10 @@ const SERVICES_AVAIL = {
     FULL_CLEAR: true
 }
 
+const PLAYER_SERVICES_AVAIL = {
+    FIRST_EIGHT: 'firstEight'
+}
+
 const STATS = {
     STR : "STRENGTH",
     AGI : "AGILITY",

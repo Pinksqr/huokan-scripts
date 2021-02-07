@@ -25,7 +25,7 @@ class RaidMember {
 class RaidMain extends RaidMember {
     constructor(playerName, playerClass, lootSpecs, available, away, availableBosses) {
         super(playerName, playerClass, lootSpecs, available, availableBosses)
-        this.away = false;
+        this.away = away;
         this.alts = []
     }
 

@@ -68,7 +68,7 @@ function updateRaidRoster(sheet, range){
         let row = range.getRow()
         let col = range.getColumn()
 
-        if (row > 4 && col < 13){
+        if (row > 4 && col < 16){
             let raidRoster = createRaidRoster()
             let maxValues = getMaxValues(sheet, raidRoster, [])
 
@@ -142,6 +142,7 @@ function updateRaidRoster(sheet, range){
                         playerClass.toUpperCase(),
                         lootSpecs,
                         available,
+                        away,
                         availableBosses
                     ));
                 }
@@ -1114,9 +1115,13 @@ function getMaxValues(sheet, raidRoster, reservations){
 
 
         for (let bossIndex in BOSSES){
+
+            //Use either the values on the raid info page, or the values on the reservation page
             let maxCarry = (sheetName === "Raid Mains" || sheetName === "Raid Alts") ?
                 carrySheet.getRange(CELLS_RAIDINFO_BOSSES[BOSSES[bossIndex]]).getValue() :
                 carrySheet.getRange(CELLS_RESERVATIONS_BOSSES[BOSSES[bossIndex]].MAX).getValue()
+
+            //Remove any current reservations from the total
             if (maxCarry > 0) {
                 for (let resIndex in reservations) {
                     let reservation = reservations[resIndex]
@@ -1159,7 +1164,7 @@ function getMaxValues(sheet, raidRoster, reservations){
                     for (let playerIndex in raidRoster){
                         let player = raidRoster[playerIndex]
 
-                        if (!isPlayerReserved(reservations, boss, player)){
+                        if (!isPlayerReserved(reservations, boss, player) && isPlayerAvailable(boss, player)){
                             if (isSpecAvailable(player) && isTokenLootable(token, boss, player)){
                                 maxWeaponTokens[boss][token] = maxWeaponTokens[boss][token] + 1 || 1
                             }
@@ -1188,7 +1193,7 @@ function getMaxValues(sheet, raidRoster, reservations){
                     for (let playerIndex in raidRoster){
                         let player = raidRoster[playerIndex]
 
-                        if (!isPlayerReserved(reservations, boss, player)){
+                        if (!isPlayerReserved(reservations, boss, player) && isPlayerAvailable(boss, player)){
                             if (isTrinketLootable(trinket, player)){
                                 maxTrinkets[trinket] = maxTrinkets[trinket] + 1 || 1
                             }
@@ -1219,7 +1224,7 @@ function getMaxValues(sheet, raidRoster, reservations){
                 for (let playerIndex in raidRoster) {
                     let player = raidRoster[playerIndex]
 
-                    if (!isPlayerReserved(reservations, boss, player)) {
+                    if (!isPlayerReserved(reservations, boss, player) && isPlayerAvailable(boss, player)) {
                         if (isSpecAvailable(player) && isArmorLootable(ARMOR_TYPES[armorIndex], player)) {
                             maxArmorTypes[boss][armorType] = maxArmorTypes[boss][armorType] + 1 || 1
                         }
@@ -1297,6 +1302,28 @@ function isPlayerReserved(reservations, boss, player){
         }
         return false
     }
+}
+
+/** A player can be unavailable for a boss if they are marked 8/10 only (more may be added in future */
+function isPlayerAvailable(boss, player) {
+    let isAvailable = true;
+
+    Object.entries(player.availableBosses).forEach(([key, value]) => {
+        switch (key) {
+            //Unavailable if first eight is checked; means player can only loot first eight, so last two aren't counted
+            case PLAYER_SERVICES_AVAIL.FIRST_EIGHT:
+                if (value) {
+                    isAvailable = !(boss === SERVICES.STONE_LEGION_GENERALS || boss === SERVICES.SIRE_DENATHRIUS);
+                }
+                break;
+
+            //Add more here if needed
+            default:
+                break;
+        }
+    })
+
+    return isAvailable
 }
 
 /** A spec is available if the player has at least one spec enabled of the three */
