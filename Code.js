@@ -681,26 +681,28 @@ function createReservationSheet(){
     newSheet.getRange(CELLS_RESERVATIONS_INFO.GUILD_INFO).setValue(raidInfoSheet.getRange(CELLS_RAIDINFO_INFO.CONCAT).getValue())
 
     //Currently not copying class data; too much clutter
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_BOSSES, newSheet, CELLS_RESERVATIONS_BOSSES)
-    copyGridCells(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES)
-    copyGridCells(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
-    copyCells(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
+    copyValues(raidInfoSheet, CELLS_RAIDINFO_BOSSES, newSheet, CELLS_RESERVATIONS_BOSSES)
+    copyGridValues(raidInfoSheet, CELLS_RAIDINFO_ARMORTYPES, newSheet, CELLS_RESERVATIONS_ARMORTYPES)
+    copyGridValues(raidInfoSheet, CELLS_RAIDINFO_WEAPONS, newSheet, CELLS_RESERVATIONS_WEAPONS)
+    copyValues(raidInfoSheet, CELLS_RAIDINFO_TRINKETS, newSheet, CELLS_RESERVATIONS_TRINKETS)
 
     /** Used to copy over values from the information sheet, to the (new) reservation sheet */
-    function copyCells(sourceSheet, sourceCells, destSheet, destCells) {
-        for (let cell in sourceCells) {
-            let value = sourceSheet.getRange(sourceCells[cell]).getValue()
-            destSheet.getRange(destCells[cell].MAX).setValue(value)
+    function copyValues(sourceSheet, sourceCells, destSheet, destCells) {
+        for (let cell in destCells) {
+            let value = sourceSheet.getRange(sourceCells[cell]).getValue();
+            let destCell = destSheet.getRange(destCells[cell].MAX);
+            value ? destCell.setValue(value) : destCell.setValue("0");
         }
     }
 
     /** Used to copy over values from the info sheet, to the (new) reservation sheet; Specifically the grid arrays
      * (Armor Types & Weapon Token grids) */
-    function copyGridCells(sourceSheet, sourceCells, destSheet, destCells) {
-        for (let row in sourceCells) {
-            for (let col in sourceCells[row]) {
-                let value = sourceSheet.getRange(sourceCells[row][col]).getValue()
-                destSheet.getRange(destCells[row][col]).setValue(value)
+    function copyGridValues(sourceSheet, sourceCells, destSheet, destCells) {
+        for (let row in destCells) {
+            for (let col in destCells[row]) {
+                let value = sourceSheet.getRange(sourceCells[row][col]).getValue();
+                let cell = destSheet.getRange(destCells[row][col]);
+                value ? cell.setValue(value) : cell.setValue("0");
             }
         }
     }
