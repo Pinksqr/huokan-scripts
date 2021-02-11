@@ -116,48 +116,47 @@ const CELLS_RESERVATIONS_SERVICES = {
     "SLUDGEFIST"            : { MAX : "C15", AVAIL : "D15" },
     "STONE LEGION GENERALS" : { MAX : "C16", AVAIL : "D16" },
     "SIRE DENATHRIUS"       : { MAX : "C17", AVAIL : "D17" },
-    "LAST WING"             : { MAX : "C18", AVAIL : "D18" },
-    "FULL CLEAR"            : { MAX : "C19", AVAIL : "D19" }
+    "FULL CLEAR"            : { MAX : "C18", AVAIL : "D18" }
 }
 
 const CELLS_RESERVATIONS_ARMORTYPES = {
-    "SHRIEKWING"            : { CLOTH : "C22", LEATHER : "D22" , MAIL : "E22", PLATE: "F22"},
-    "HUNTSMAN ALTIMOR"      : { CLOTH : "C23", LEATHER : "D23" , MAIL : "E23", PLATE: "F23"},
-    "SUN KING'S SALVATION"  : { CLOTH : "C24", LEATHER : "D24" , MAIL : "E24", PLATE: "F24"},
-    "ARTIFICER XY'MOX"      : { CLOTH : "C25", LEATHER : "D25" , MAIL : "E25", PLATE: "F25"},
-    "HUNGERING DESTROYER"   : { CLOTH : "C26", LEATHER : "D26" , MAIL : "E26", PLATE: "F26"},
-    "LADY INERVA DARKVEIN"  : { CLOTH : "C27", LEATHER : "D27" , MAIL : "E27", PLATE: "F27"},
-    "THE COUNCIL OF BLOOD"  : { CLOTH : "C28", LEATHER : "D28" , MAIL : "E28", PLATE: "F28"},
-    "SLUDGEFIST"            : { CLOTH : "C29", LEATHER : "D29" , MAIL : "E29", PLATE: "F29"},
-    "STONE LEGION GENERALS" : { CLOTH : "C30", LEATHER : "D30" , MAIL : "E30", PLATE: "F30"},
-    "SIRE DENATHRIUS"       : { CLOTH : "C31", LEATHER : "D31" , MAIL : "E31", PLATE: "F31"},
+    "SHRIEKWING"            : { CLOTH : "C21", LEATHER : "D21" , MAIL : "E21", PLATE: "F21"},
+    "HUNTSMAN ALTIMOR"      : { CLOTH : "C22", LEATHER : "D22" , MAIL : "E22", PLATE: "F22"},
+    "SUN KING'S SALVATION"  : { CLOTH : "C23", LEATHER : "D23" , MAIL : "E23", PLATE: "F23"},
+    "ARTIFICER XY'MOX"      : { CLOTH : "C24", LEATHER : "D24" , MAIL : "E24", PLATE: "F24"},
+    "HUNGERING DESTROYER"   : { CLOTH : "C25", LEATHER : "D25" , MAIL : "E25", PLATE: "F25"},
+    "LADY INERVA DARKVEIN"  : { CLOTH : "C26", LEATHER : "D26" , MAIL : "E26", PLATE: "F26"},
+    "THE COUNCIL OF BLOOD"  : { CLOTH : "C27", LEATHER : "D27" , MAIL : "E27", PLATE: "F27"},
+    "SLUDGEFIST"            : { CLOTH : "C28", LEATHER : "D28" , MAIL : "E28", PLATE: "F28"},
+    "STONE LEGION GENERALS" : { CLOTH : "C29", LEATHER : "D29" , MAIL : "E29", PLATE: "F29"},
+    "SIRE DENATHRIUS"       : { CLOTH : "C30", LEATHER : "D30" , MAIL : "E30", PLATE: "F30"},
 };
 
 const CELLS_RESERVATIONS_WEAPONS = {
-    "HUNTSMAN ALTIMOR"      : { ABOMINABLE : "C36", MYSTIC : "D36" , VENERATED : "E36", ZENITH: "F36"},
-    "SUN KING'S SALVATION"  : { ABOMINABLE : "C37", MYSTIC : "D37" , VENERATED : "E37", ZENITH: "F37"},
-    "HUNGERING DESTROYER"   : { ABOMINABLE : "C38", MYSTIC : "D38" , VENERATED : "E38", ZENITH: "F38"},
-    "THE COUNCIL OF BLOOD"  : { ABOMINABLE : "C39", MYSTIC : "D39" , VENERATED : "E39", ZENITH: "F39"},
-    "SIRE DENATHRIUS"       : { ABOMINABLE : "C40", MYSTIC : "D40" , VENERATED : "E40", ZENITH: "F40"},
+    "HUNTSMAN ALTIMOR"      : { ABOMINABLE : "C42", MYSTIC : "D42" , VENERATED : "E42", ZENITH: "F42"},
+    "SUN KING'S SALVATION"  : { ABOMINABLE : "C43", MYSTIC : "D43" , VENERATED : "E43", ZENITH: "F43"},
+    "HUNGERING DESTROYER"   : { ABOMINABLE : "C44", MYSTIC : "D44" , VENERATED : "E44", ZENITH: "F44"},
+    "THE COUNCIL OF BLOOD"  : { ABOMINABLE : "C45", MYSTIC : "D45" , VENERATED : "E45", ZENITH: "F45"},
+    "SIRE DENATHRIUS"       : { ABOMINABLE : "C46", MYSTIC : "D46" , VENERATED : "E46", ZENITH: "F46"},
 };
 
 const CELLS_RESERVATIONS_TRINKETS = {
-    "SKULKER'S WING"                : { MAX : "C43", AVAIL : "D43" },
-    "BARGAST'S LEASH"               : { MAX : "C44", AVAIL : "D44" },
-    "GLUTTINOUS SPIKE"              : { MAX : "C45", AVAIL : "D45" },
-    "CONSUMPTIVE INFUSION"          : { MAX : "C46", AVAIL : "D46" },
-    "GLYPH OF ASSIMILATION"         : { MAX : "C47", AVAIL : "D47" },
-    "SPLINTERED HEART OF AL'AR"     : { MAX : "C48", AVAIL : "D48" },
-    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C49", AVAIL : "D49" },
-    "SOUL IGNITER"                  : { MAX : "C50", AVAIL : "D50" },
-    "MEMORY OF PAST SINS"           : { MAX : "C51", AVAIL : "D51" },
-    "MACABRE SHEET MUSIC"           : { MAX : "C52", AVAIL : "D52" },
-    "HATEFUL CHAIN"                 : { MAX : "C53", AVAIL : "D53" },
-    "STONE LEGION HERALDRY"         : { MAX : "C54", AVAIL : "D54" },
-    "SANGUINE VINTAGE"              : { MAX : "C55", AVAIL : "D55" },
-    "CABALIST'S HYMNAL"             : { MAX : "C56", AVAIL : "D56" },
-    "MANABOUND MIRROR"              : { MAX : "C57", AVAIL : "D57" },
-    "DREADFIRE VESSEL"              : { MAX : "C58", AVAIL : "D58" }
+    "SKULKER'S WING"                : { MAX : "C49", AVAIL : "D49" },
+    "BARGAST'S LEASH"               : { MAX : "C50", AVAIL : "D50" },
+    "GLUTTINOUS SPIKE"              : { MAX : "C51", AVAIL : "D51" },
+    "CONSUMPTIVE INFUSION"          : { MAX : "C52", AVAIL : "D52" },
+    "GLYPH OF ASSIMILATION"         : { MAX : "C53", AVAIL : "D53" },
+    "SPLINTERED HEART OF AL'AR"     : { MAX : "C54", AVAIL : "D54" },
+    "TUFT OF SMOULDERING PLUMAGE"   : { MAX : "C55", AVAIL : "D55" },
+    "SOUL IGNITER"                  : { MAX : "C56", AVAIL : "D56" },
+    "MEMORY OF PAST SINS"           : { MAX : "C57", AVAIL : "D57" },
+    "MACABRE SHEET MUSIC"           : { MAX : "C58", AVAIL : "D58" },
+    "HATEFUL CHAIN"                 : { MAX : "C59", AVAIL : "D59" },
+    "STONE LEGION HERALDRY"         : { MAX : "C60", AVAIL : "D60" },
+    "SANGUINE VINTAGE"              : { MAX : "C61", AVAIL : "D61" },
+    "CABALIST'S HYMNAL"             : { MAX : "C62", AVAIL : "D62" },
+    "MANABOUND MIRROR"              : { MAX : "C63", AVAIL : "D63" },
+    "DREADFIRE VESSEL"              : { MAX : "C64", AVAIL : "D64" }
 };
 
 /** RAID MAINS & RAID ALTS SHEET */

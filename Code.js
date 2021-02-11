@@ -488,9 +488,10 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
      */
     function getTypesByService(service){
         //If service is full clear, you cannot book a trinket or weapon funnel
-        if (service === SERVICES.FULL_CLEAR){
+        if (service === SERVICES.FULL_CLEAR || BUNDLES.includes(service)){
             return [FUNNEL_TYPES.ARMOR]
         }
+
         //Otherwise, filter the service type by the boss (since some bosses dont drop weapon tokens, etc)
         for (let boss in BOSSES){
             if (service === BOSSES[boss]){
@@ -527,7 +528,14 @@ function updateReservationServiceInfoDropdowns(sheet, range) {
     function getOptionsByServiceType(service, type){
         switch(service){
             case SERVICES.FULL_CLEAR:
-            case SERVICES.LAST_WING:
+            case SERVICES.TWO:
+            case SERVICES.THREE:
+            case SERVICES.FOUR:
+            case SERVICES.FIVE:
+            case SERVICES.SIX:
+            case SERVICES.SEVEN:
+            case SERVICES.EIGHT:
+            case SERVICES.NINE:
                 //Return everything
                 return Object.values(ARMOR_TYPES)
             default:
@@ -756,11 +764,11 @@ function handleReservations(sheet, range, value){
 
     if (sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Raid Information"){
         if (row > 7 && col === COLUMNS_RESERVATIONS.CHECKBOX) {
-            //TODO: Remove hard-coded cell location
             let response
             let isReservation, isCancellation
             let raidRoster = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RAID_ROSTER).getValue())
             let reservations = JSON.parse(sheet.getRange(CELLS_RESERVATIONS_JSON.RESERVATIONS).getValue())
+
             let buyer = {
                 buyerName   : sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_NAME).getValue(),
                 discordId   : sheet.getRange(row, COLUMNS_RESERVATIONS.BUYER_DISCID).getValue(),
@@ -872,8 +880,59 @@ function handleReservations(sheet, range, value){
 
         /** Checks if a carry spot is available for the reservation request */
         function isSpotAvailable(){
-            let availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue()
-            return availableCarries > 0
+            let availableCarries = 0;
+
+            // For bundles, they aren't tracked under general spot info, so gotta find it via calc.
+            if (BUNDLES.includes(buyer.service)){
+                let min=1000;
+                switch (buyer.service) {
+                    case SERVICES.TWO:
+                        BUNDLE_SERVICES.TWO.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        });
+                        break;
+                    case SERVICES.THREE:
+                        BUNDLE_SERVICES.THREE.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.FOUR:
+                        BUNDLE_SERVICES.FOUR.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.FIVE:
+                        BUNDLE_SERVICES.FIVE.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.SIX:
+                        BUNDLE_SERVICES.SIX.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.SEVEN:
+                        BUNDLE_SERVICES.SEVEN.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.EIGHT:
+                        BUNDLE_SERVICES.EIGHT.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                    case SERVICES.NINE:
+                        BUNDLE_SERVICES.NINE.forEach(service => {
+                            min = Math.min(min, sheet.getRange(CELLS_RESERVATIONS_SERVICES[service].AVAIL).getValue());
+                        })
+                        break;
+                }
+                availableCarries = min;
+            } else {
+                availableCarries = sheet.getRange(CELLS_RESERVATIONS_SERVICES[buyer.service].AVAIL).getValue();
+            }
+
+            return availableCarries > 0;
         }
 
         /**
@@ -1131,12 +1190,45 @@ function getMaxValues(sheet, raidRoster, reservations){
                         case SERVICES.FULL_CLEAR:
                             maxCarry--
                             break;
-                        case SERVICES.LAST_WING:
-                            if (
-                                BOSSES[bossIndex] === SERVICES.SLUDGEFIST ||
-                                BOSSES[bossIndex] === SERVICES.STONE_LEGION_GENERALS ||
-                                BOSSES[bossIndex] === SERVICES.SIRE_DENATHRIUS
-                            ){  maxCarry-- }
+                        case SERVICES.TWO:
+                            if (BUNDLE_SERVICES.TWO.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.THREE:
+                            if (BUNDLE_SERVICES.THREE.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.FOUR:
+                            if (BUNDLE_SERVICES.FOUR.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.FIVE:
+                            if (BUNDLE_SERVICES.FIVE.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.SIX:
+                            if (BUNDLE_SERVICES.SIX.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.SEVEN:
+                            if (BUNDLE_SERVICES.SEVEN.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.EIGHT:
+                            if (BUNDLE_SERVICES.EIGHT.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
+                            break;
+                        case SERVICES.NINE:
+                            if (BUNDLE_SERVICES.NINE.includes(BOSSES[bossIndex])){
+                                maxCarry--;
+                            }
                             break;
                         default:
                             if (BOSSES[bossIndex] === reservations[resIndex].service) {
@@ -1249,21 +1341,51 @@ function isPlayerReserved(reservations, boss, player){
     for (let reservation of reservations){
 
         if (BUNDLES.includes(boss)) {
-            //Check if the boss is a full clear or bundle
+            //Check if the boss is a bundle (eg, full clear, last wing, 2/10, etc...)
             switch (boss) {
                 case SERVICES.FULL_CLEAR:
                     isBooster = isPlayerBooster(player, reservation.boosters)
                     break;
-                case SERVICES.LAST_WING:
-                    if (reservation.service === SERVICES.SLUDGEFIST || reservation.service === SERVICES.STONE_LEGION_GENERALS || reservation.service === SERVICES.SIRE_DENATHRIUS) {
-                        isBooster = isPlayerBooster(player, reservation.boosters)
+                case SERVICES.TWO:
+                    if (BUNDLE_SERVICES.TWO.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
                     }
                     break;
-                case SERVICES.LAST_TWO:
-                    if (reservation.service === SERVICES.STONE_LEGION_GENERALS || reservation.service === SERVICES.SIRE_DENATHRIUS){
-                        isBooster = isPlayerBooster(player, reservation.boosters)
+                case SERVICES.THREE:
+                    if (BUNDLE_SERVICES.THREE.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
                     }
-                    break
+                    break;
+                case SERVICES.FOUR:
+                    if (BUNDLE_SERVICES.FOUR.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.FIVE:
+                    if (BUNDLE_SERVICES.FIVE.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.SIX:
+                    if (BUNDLE_SERVICES.SIX.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.SEVEN:
+                    if (BUNDLE_SERVICES.SEVEN.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.EIGHT:
+                    if (BUNDLE_SERVICES.EIGHT.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.NINE:
+                    if (BUNDLE_SERVICES.NINE.includes(reservation.service)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
             }
         } else {
             //Check if the reservation matches the boss, or is a full clear or other bundle
@@ -1271,16 +1393,46 @@ function isPlayerReserved(reservations, boss, player){
                 case SERVICES.FULL_CLEAR:
                     isBooster = isPlayerBooster(player, reservation.boosters)
                     break;
-                case SERVICES.LAST_WING:
-                    if (boss === SERVICES.SLUDGEFIST || boss === SERVICES.STONE_LEGION_GENERALS || boss === SERVICES.SIRE_DENATHRIUS){
-                        isBooster = isPlayerBooster(player, reservation.boosters)
+                case SERVICES.TWO:
+                    if (BUNDLE_SERVICES.TWO.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
                     }
                     break;
-                case SERVICES.LAST_TWO:
-                    if (boss === SERVICES.STONE_LEGION_GENERALS || boss === SERVICES.SIRE_DENATHRIUS){
-                        isBooster = isPlayerBooster(player, reservation.boosters)
+                case SERVICES.THREE:
+                    if (BUNDLE_SERVICES.THREE.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
                     }
-                    break
+                    break;
+                case SERVICES.FOUR:
+                    if (BUNDLE_SERVICES.FOUR.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.FIVE:
+                    if (BUNDLE_SERVICES.FIVE.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.SIX:
+                    if (BUNDLE_SERVICES.SIX.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.SEVEN:
+                    if (BUNDLE_SERVICES.SEVEN.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.EIGHT:
+                    if (BUNDLE_SERVICES.EIGHT.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
+                case SERVICES.NINE:
+                    if (BUNDLE_SERVICES.NINE.includes(boss)){
+                        isBooster = isPlayerBooster(player, reservation.boosters);
+                    }
+                    break;
                 case boss:
                     isBooster = isPlayerBooster(player, reservation.boosters)
                     break;
@@ -1288,7 +1440,6 @@ function isPlayerReserved(reservations, boss, player){
         }
 
         if (isBooster){
-            Logger.log("Player is reserved!")
             break;
         }
     }
@@ -1298,7 +1449,6 @@ function isPlayerReserved(reservations, boss, player){
     function isPlayerBooster(player, boosters){
         for (let index in boosters){
             if (boosters[index].mainName === player.playerName){
-                Logger.log(player.playerName + " is booster!")
                 return true
             }
         }
@@ -1309,17 +1459,21 @@ function isPlayerReserved(reservations, boss, player){
 /** A player can be unavailable for a boss if they are marked 8/10 only (more may be added in future */
 function isPlayerAvailable(boss, player) {
     let isAvailable = true;
+    Logger.log(boss, player)
 
     Object.entries(player.availableBosses).forEach(([key, value]) => {
         switch (key) {
             //Unavailable if first eight is checked; means player can only loot first eight, so last two aren't counted
             case PLAYER_SERVICES_AVAIL.FIRST_EIGHT:
                 if (value) {
-                    isAvailable = !(boss === SERVICES.STONE_LEGION_GENERALS || boss === SERVICES.SIRE_DENATHRIUS);
+                    isAvailable = !(
+                        boss === SERVICES.STONE_LEGION_GENERALS ||
+                        boss === SERVICES.SIRE_DENATHRIUS ||
+                        boss === SERVICES.NINE ||
+                        boss === SERVICES.FULL_CLEAR
+                    );
                 }
                 break;
-
-            //Add more here if needed
             default:
                 break;
         }
@@ -1384,7 +1538,6 @@ function isTypeOptionValid(type, option){
             valid = isOptionInType(option, ARMOR_TYPES)
             break
     }
-    Logger.log("Type option for " + type + " " + option + " is " + valid)
     return valid
 
     function isOptionInType(option, collection){
@@ -1464,17 +1617,4 @@ function getTrinketLootable(trinket, player){
         }
         return trinkets;
     }
-}
-
-/**
- * Gets services that are available for this sheet (ex, heroic only has full clear, last wing, and last two
- */
-function getAddedServices() {
-    let services = []
-    for (let index in SERVICES_AVAIL){
-       if (SERVICES_AVAIL[index]){
-           services.push(SERVICES[index])
-       }
-    }
-    return services
 }
