@@ -625,7 +625,6 @@ function checkReservationBuyerInfo(sheet, range, value){
             let isBuyerTrinket = false
             let trinkets = []
 
-            Logger.log(SPECIALIZATIONS[CLASSES[buyerClass]])
             for (let index in SPECIALIZATIONS[CLASSES[buyerClass]]){
                 if (buyerSpec === SPECIALIZATIONS[CLASSES[buyerClass]][index]){
                     trinkets = SPEC_TRINKETS[CLASSES[buyerClass]][index]
@@ -657,7 +656,6 @@ function createReservationSheet(){
     //For each spreadsheet, hide anything that isn't raid info, or roster
     for (let index in sheets){
         let sheetName = sheets[index].getSheetName()
-        Logger.log(index + " " + sheetName)
         if (sheetName !== "Raid Information" && sheetName !== "Raid Mains" && sheetName !== "Raid Alts" && sheetName !== "Reservation Template"){
             if (index < 4){
                 sheets[index].activate()
